@@ -2,7 +2,7 @@ import unittest
 
 from iterable_wrapper import IterableAPI
 
-# init class so we can test requests
+# init class so we can test wrapper
 API_KEY= "94c3333a8e224b32b93a40788d1927cc"
 ic= IterableAPI(api_key=API_KEY)
 
