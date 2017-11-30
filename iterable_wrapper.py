@@ -60,8 +60,9 @@ class IterableAPI():
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
 							 headers=headers, data=data, json=json)
 		
-		# for debugging-- want 401 error without API key
-		
+		# print(r.status_code)
+		print(r.url)
+
 		if (r.status_code == 200):
 			return r.json()
 
@@ -1558,6 +1559,8 @@ class IterableAPI():
 			payload["listId"]= list_id
 
 		return self.api_call(call=call, method="POST", json=payload)
+
+
 
 
 
