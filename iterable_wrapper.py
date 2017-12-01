@@ -61,7 +61,7 @@ class IterableAPI():
 							 headers=headers, data=data, json=json)
 		
 		# print(r.status_code)
-		print(r.url)
+		print(r.json())
 
 		if (r.status_code == 200):
 			return r.json()

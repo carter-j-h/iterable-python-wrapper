@@ -1,0 +1,26 @@
+{  
+   "user":{
+      "email":"carter+test@iterable.com",
+      "dataFields":{}
+
+   },
+   
+   "items":[  
+      {  
+         "id":"1000",
+         "sku":"2000",
+         "name":"iPhone X",
+         "description":"Our vision has always been to create an iPhone that is entirely screen. One so immersive the device itself disappears into the experience. And so intelligent it can respond to a tap, your voice, and even a glance. With iPhone X, that vision is now a reality. Say hello to the future.",
+         "categories":[  
+            "phone",
+            "mobile"
+         ],
+         "price":849.99,
+         "quantity":1,
+         "imageUrl":"https://store.storeimages.cdn-apple.com/4974/as-images.apple.com/is/image/AppleInc/aos/published/images/i/ph/iphone/x/iphone-x-silver-select-2017?wid=1200&hei=630&fmt=jpeg&qlt=95&op_sharpen=0&resMode=bicub&op_usm=0.5,0.5,0,0&iccEmbed=0&layer=comp&.v=1503608387546"
+      }
+   ],
+   "total": 848.99,
+   "createdAt": 1512155953
+
+}

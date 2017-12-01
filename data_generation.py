@@ -1,9 +1,15 @@
 import csv
+import json
 
 from datetime import datetime
 from faker import Faker
 
 from iterable_wrapper import IterableAPI
+
+#load some of my test json data for easy testing
+commerce_data = json.load(open('json_data/shopping_cart.json'))
+purchase_data = json.load(open('json_data/track_purchase.json'))
+event_data = json.load(open('json_data/events.json'))
 
 # Iterable Instance Credentials
 API_KEY = "94c3333a8e224b32b93a40788d1927cc"
@@ -36,11 +42,10 @@ class DataGeneration(IterableAPI):
 
 	def generate_events(self):
 
-		return self.track_event(email="carter+test@iterable.com", event_name="login",
-								created_at=str(datetime.now()),
-								data_fields={"device": "Macbook Pro",
-											 "location": "San Francisco, CA",
-											  "website":"iterable"})
+		return self.track_event(email=event_data["email"],
+								event_name=event_data["eventName"],
+								created_at=event_data["createdAt"],
+								data_fields=event_data["dataFields"])
 
 
 	def delete_users_from_csv(self, csv_file=None):
@@ -67,6 +72,21 @@ class DataGeneration(IterableAPI):
 				for row in readCSV:			
 
 					self.delete_user(email=str(row[index]))
+
+
+	def generate_items_in_cart(self):
+
+		return self.update_cart(user=commerce_data["user"],
+							    items=commerce_data["items"])
+
+		for i in commerce_data
+
+	def generate_puchase_requests(self):
+
+		return self.track_purchase(user=purchase_data["user"],
+								   items=purchase_data["items"],
+								   total=purchase_data["total"],
+								   created_at=purchase_data["createdAt"])
 	        
 
 	
@@ -77,8 +97,13 @@ data= DataGeneration(users=1, events=1)
 
 # print(data.generate_users())
 
-print(data.delete_users_from_csv(csv_file='path/tofile/here'))
+# print(data.delete_users_from_csv(csv_file='path/tofile/here'))
 
+# data.generate_items_in_cart()
+
+# data.generate_puchase_requests()
+
+data.generate_events()
 
 
 

@@ -1,0 +1,24 @@
+{
+	"events":[
+
+		{
+			"email": "carter+test@iterable.com",
+			"eventName": "user_signup",
+			"createdAt": 1512158194,
+			"dataFields": {
+				"device": "Macbook Pro",
+				"location": "San Francisco, CA",
+				"website":"https://wwww.iterable.com",
+				"user-agent": "Chrome/60.0.3112.113 Safari/537.36"
+			}
+		},
+
+		{
+			
+
+
+			
+		}
+	]
+
+}
