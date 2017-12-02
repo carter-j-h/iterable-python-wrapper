@@ -11,7 +11,7 @@ APIKEY="ENTER YOUR API CREDENTIALS HERE"
 ic = IterableAPI(api_key=APIKEY)
 ```
 
-###### Campaigns
+## Campaigns
 
 List Campaign Info: (https://api.iterable.com/api/docs#!/campaigns/campaigns)
 
