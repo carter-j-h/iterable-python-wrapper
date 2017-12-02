@@ -1,7 +1,17 @@
 # IterableWrapper
 Python Wrapper for the Iterable API, more details coming soon
 
-## Installation:
+## Installation
+
+pip install iterablepythonwrapper
+
+
+## Setup
+
+pip install -r requirements.txt
+
+
+## Usage:
 
 ```python
 from iterable_wrapper import IterableAPI
