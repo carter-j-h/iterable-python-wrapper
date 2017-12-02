@@ -1,4 +1,4 @@
-icaimport csv
+import csv
 import json
 import requests
 import time
