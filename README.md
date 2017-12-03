@@ -5,11 +5,9 @@ Python Wrapper for the Iterable API, more details coming soon
 
 pip install iterablepythonwrapper
 
-
 ## Setup
 
 pip install -r requirements.txt
-
 
 ## Usage:
 
