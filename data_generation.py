@@ -11,6 +11,12 @@ commerce_data = json.load(open('json_data/shopping_cart.json'))
 purchase_data = json.load(open('json_data/track_purchase.json'))
 event_data = json.load(open('json_data/events.json'))
 
+#list of different events to fake into Iterable instance.  Will be chosen at random
+events= ['login', 'downloaded_whitepaper', 'user_signup', 'event_registration',
+		'free_trial_download', 'downloaded_mobile_app', 'uploaded_profile_photo',
+		]
+
+
 # Iterable Instance Credentials
 API_KEY = "94c3333a8e224b32b93a40788d1927cc"
 

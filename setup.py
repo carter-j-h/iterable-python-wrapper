@@ -3,7 +3,7 @@ from setuptools import setup
 
 long_description = '''
 Iterable Python is a Python client that wraps the Iterable API.
-Originally developed by Carter Hickingbotham
+Originally developed by Carter Hickingbotham.
 '''
 
 setup(
