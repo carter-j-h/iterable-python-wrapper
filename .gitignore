@@ -1,2 +1,3 @@
-.cache/
-__pyache__/
+*.cache
+*__pyache__
+*.pyc
