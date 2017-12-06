@@ -1,6 +1,9 @@
-from unittest import mock 
+# from unittest import mock 
+import pytest
 
-import iterable_wrapper
+from iterable_wrapper import IterableAPI
+# Set API_KEY for my instance
+
 # import iterable_wrapper
 
 # init class so we can test wrapper effectiveness
@@ -21,28 +24,28 @@ import iterable_wrapper
 
 
 # @mock.patch decorator passes a MagicMock object that replaces the class you are mocking into the function it is decorating.
-@mock.patch("iterable_wrapper.IterableAPI")
-def mock_IterableAPI(mock_class):
-	print(mock_class)
-	print(iterable_wrapper.IterableAPI)
+# @mock.patch("iterable_wrapper.IterableAPI")
+# def mock_IterableAPI(mock_class):
+# 	print(mock_class)
+# 	print(iterable_wrapper.IterableAPI)
 
-	API_KEY= "94c3333a8e224b32b93a40788d1927cc"
+# 	API_KEY= "94c3333a8e224b32b93a40788d1927cc"
 
-	ic = iterable_wrapper.IterableAPI(api_key=API_KEY)
-	print(ic)
+# 	ic = iterable_wrapper.IterableAPI(api_key=API_KEY)
+# 	print(ic)
 	
-	print(mock_class.return_value)
+# 	print(mock_class.return_value)
 
-	mock_request = MockRequests()
-	mock_request.status_code = 200
-	mock_request.text = "{'channels': [{'channelType': 'Marketing', 'id': 9721, 'name': 'Push Marketing Channel', 'messageMedium': 'Push'}, {'channelType': 'Transactional', 'id': 9720, 'name': 'Transactional Channel', 'messageMedium': 'Email'}, {'channelType': 'Marketing', 'id': 9719, 'name': 'Marketing Channel', 'messageMedium': 'Email'}]}"
-	response = ic.list_channels()
-	self.assertTrue(response.status_code == 200)
-
-
+# 	mock_request = MockRequests()
+# 	mock_request.status_code = 200
+# 	mock_request.text = "{'channels': [{'channelType': 'Marketing', 'id': 9721, 'name': 'Push Marketing Channel', 'messageMedium': 'Push'}, {'channelType': 'Transactional', 'id': 9720, 'name': 'Transactional Channel', 'messageMedium': 'Email'}, {'channelType': 'Marketing', 'id': 9719, 'name': 'Marketing Channel', 'messageMedium': 'Email'}]}"
+# 	response = ic.list_channels()
+# 	self.assertTrue(response.status_code == 200)
 
 
-mock_IterableAPI()
+
+
+# mock_IterableAPI()
 
 
 # def use_wrapper():
@@ -74,4 +77,18 @@ mock_IterableAPI()
 # test =APITest()
 
 # test.test_wrapped_example(MockRequests)
+
+@pytest.fixture
+def ic():
+	return IterableAPI(api_key='foo')
+
+
+def test_iterable_client(ic):
+
+	assert isinstance(ic, object)
+	assert ic.base_uri == 'https://api.iterable.com'
+	assert ic.api_key == 'foo'
+
+
+
 # 	
