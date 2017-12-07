@@ -138,15 +138,31 @@
 
 # https://medium.com/python-pandemonium/python-mocking-you-are-a-tricksy-beast-6c4a1f8d19b2
 
-from unittest import mock
+from unittest import mock 
 
 import iterable_wrapper
 
 @mock.patch("iterable_wrapper.IterableAPI")
-def mock_simple_class(mock_class):
+def mock_IterableAPI(mock_class):
 	print(mock_class)
+	print(iterable_wrapper.IterableAPI)
+
+	API_KEY= "94c3333a8e224b32b93a40788d1927cc"
+
+	ic = iterable_wrapper.IterableAPI(api_key=API_KEY)
+	print(ic)
+	
+	print(mock_class.return_value)
+
+	mock_request = MockRequests()
+	mock_request.status_code = 200
+	mock_request.text = "{'channels': [{'channelType': 'Marketing', 'id': 9721, 'name': 'Push Marketing Channel', 'messageMedium': 'Push'}, {'channelType': 'Transactional', 'id': 9720, 'name': 'Transactional Channel', 'messageMedium': 'Email'}, {'channelType': 'Marketing', 'id': 9719, 'name': 'Marketing Channel', 'messageMedium': 'Email'}]}"
+	response = ic.list_channels()
+	self.assertTrue(response.status_code == 200)
 
 
-mock_simple_class()
+
+
+mock_IterableAPI()
 
 	
