@@ -61,10 +61,11 @@ class IterableAPI():
 							 headers=headers, data=data, json=json)
 		
 		# print(r.status_code)
-		print(r.json())
+		# print(r.json())
 
 		if (r.status_code == 200):
-			return r.json()
+			# return r.json()
+			return r.status_code
 
 		else:
 			print(r.status_code)
@@ -290,7 +291,7 @@ class IterableAPI():
 		 		and limit < 200):
 			payload["limit"]= limit
 
-		return self.api_call(call=call, method="GET", parms=payload)
+		return self.api_call(call=call, method="GET", params=payload)
 
 	def consume_in_app_notification(self, email=None, user_id=None,
 									message_id=None, button_index=None):
@@ -592,9 +593,9 @@ class IterableAPI():
 		payload ={}
 
 		if list_name is not None:
-			payload["name"]= str(list_name)
+			payload["name"]= list_name
 
-		return self.api_call(call="call", method="POST", json=payload)
+		return self.api_call(call=call, method="POST", json=payload)
 
 	def delete_static_list(self, list_id=None):
 
