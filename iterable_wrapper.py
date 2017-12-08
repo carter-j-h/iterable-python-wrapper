@@ -3,8 +3,10 @@ import json
 import requests
 import time
 
+from datetime import datetime
 
-class IterableAPI():
+
+class IterableApi():
 	"""
 	This is a python wrapper for the Iterable API
 
@@ -59,13 +61,10 @@ class IterableAPI():
 		# make the request following the 'requests.request' method
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
 							 headers=headers, data=data, json=json)
-		
-		# print(r.status_code)
-		# print(r.json())
 
 		if (r.status_code == 200):
 			# return r.json()
-			return r.status_code
+			return r.json()
 
 		else:
 			print(r.status_code)
@@ -82,7 +81,7 @@ class IterableAPI():
 
 		return self.api_call(call=call, method="GET")
 
-	def create_campaign(self, name=None, list_ids=None, template_id=None,
+	def create_campaign(self, name, list_ids, template_id,
 						suppression_list_ids=None, send_at=None,
 						send_mode=None, start_time_zone=None,
 						default_time_zone=None, data_fields=None):
@@ -91,14 +90,16 @@ class IterableAPI():
 
 		payload ={}
 
-		if name is not None:
-			payload["name"]= str(name)
+		payload["name"]= str(name)
 
-		if list_ids is not None:
+		if isinstance(list_ids, list):
 			payload["listIds"]= list_ids
 
-		if template_id is not None:
-			payload["template_id"]= template_id
+		else:
+			raise TypeError('ListIds are not in the required Array format')
+
+
+		payload["template_id"]= template_id
 
 		if suppression_list_ids is not None:
 			payload["supressionListIds"]= suppression_list_ids
@@ -121,21 +122,37 @@ class IterableAPI():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def get_campaign_metrics(self, campaign_id=None, start_date_time=None,
+	def get_campaign_metrics(self, campaign_id, start_date_time=None,
 							 end_date_time=None, use_new_format=None):
 
 		call= "/api/campaigns/metrics"
 
 		payload ={}
 
-		if campaign_id is not None:
-			payload["campaignId"]= campaign_id
+		if isinstance(campaign_id, list):
+			if len(campaign_id)>=1:
+				payload["campaignId"]= campaign_id
+			else:
+				raise ValueError('You need to pass in at least 1 campaign id')
+		else:
+			raise TypeError('campaign ids are not stored in list format')
 
-		if start_date_time is not None:
-			payload["startDateTime"]= str(start_date_time)
+		if isinstance(start_date_time, datetime.datetime):			
+			payload["startDateTime"]= start_date_time
+		else:
+			raise TypeError('Start date is in incorrect format')
 
-		if end_date_time is not None:
-			payload["endDateTime"]= str(end_date_time)
+		if isinstance(end_date_time, datetime.datetime):
+			
+			payload["endDateTime"]= end_date_time
+		else:
+			raise TypeError('End date is in incorrect format')
+		
+		# if start_date_time is not None:
+		# 	payload["startDateTime"]= str(start_date_time)
+
+		# if end_date_time is not None:
+		# 	payload["endDateTime"]= str(end_date_time)
 
 		if use_new_format is not None:
 			payload["useNewFormat"]= use_new_format
@@ -143,11 +160,9 @@ class IterableAPI():
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def get_child_campaigns(self, campaign_id=None):
+	def get_child_campaigns(self, campaign_id):
 
-		if campaign_id is not None:
-			call = "/api/campaigns/recurring/"+str(campaign_id)+"/childCampaigns"
-
+		call = "/api/campaigns/recurring/"+str(campaign_id)+"/childCampaigns"
 
 		return self.api_call(call=call, method="GET")
 
@@ -171,28 +186,34 @@ class IterableAPI():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def track_purchase(self, user=None, items=None, campaign_id=None, 
-					   template_id=None, total=None, created_at=None,
+	def track_purchase(self, user, items, total, campaign_id=None, 
+					   template_id=None, created_at=None,
 					   data_fields=None):
 
 		call="/api/commerce/trackPurchase"
 
 		payload ={}
-
-		if user is not None:
+	
+		if isinstance(user, dict):
 			payload["user"]= user
+		else:
+			raise TypeError('user key is not in Dictionary format')
 
-		if items is not None:
+		if isinstance(items, list):
 			payload["items"]= items
+		else:
+			raise TypeError('items are not in Array format')
+
+		if isinstance(total, float):
+			payload["total"]= total
+		else:
+			raise TypeError('total is not in correct format')
 
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
 		if template_id is not None:
-			payload["templateId"]= template_id
-
-		if total is not None:
-			payload["total"]= total
+			payload["templateId"]= template_id		
 
 		if created_at is not None:
 			payload["createdAt"]= created_at
@@ -208,11 +229,16 @@ class IterableAPI():
 
 		payload ={}
 
-		if user is not None:
+		if isinstance(user, dict):
 			payload["user"]= user
+		else:
+			raise Exception('user is not in Dictionary format')
 
-		if items is not None:
+
+		if isinstance(items, list):
 			payload["items"]= items
+		else:
+			raise Exception('items are not in Array format')
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -222,7 +248,7 @@ class IterableAPI():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_email(self, campaign_id=None, recipient_email=None,
+	def send_email(self, campaign_id, recipient_email=None,
 				   data_fields=None, send_at=None,
 				   allow_repeat_marketing_sends=None, metadata=None,
 				   message_medium=None, icon_class=None, name=None):
@@ -231,11 +257,9 @@ class IterableAPI():
 
 		payload ={}
 
-		if campaign_id is not None:
-			payload["campaignId"]= campaign_id
+		payload["campaignId"]= campaign_id
 
-		if recipient_email is not None:
-			payload["recipientEmail"]= str(recipient_email)
+		payload["recipientEmail"]= str(recipient_email)
 
 		if data_fields is not None:
 			payload["dataFields"]= data_fields
@@ -249,15 +273,10 @@ class IterableAPI():
 		if metadata is not None:
 			payload["metadata"]= metadata
 
-		if message_medium is not None:
+		if isinstance(message_medium, dict):
 			payload["messageMedium"]= message_medium
-
-		if icon_class is not None:
-			payload["iconClass"]= icon_class
-
-		if name is not None:
-			payload["name"]= name
-
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		return self.api_call(call=call, method="POST", json=payload)
 

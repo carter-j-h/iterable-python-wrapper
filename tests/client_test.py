@@ -142,7 +142,7 @@ from unittest import mock
 
 import iterable_wrapper
 
-@mock.patch("iterable_wrapper.IterableAPI")
+@mock.patch("iterable_wrapper.IterableApi")
 def mock_simple_class(mock_class):
 	print(mock_class)
 
