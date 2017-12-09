@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from faker import Faker
 
-from iterable_wrapper import IterableAPI
+from iterable_wrapper import IterableApi
 
 #load some of my test json data for easy testing
 commerce_data = json.load(open('json_data/shopping_cart.json'))
@@ -21,13 +21,13 @@ events= ['login', 'downloaded_whitepaper', 'user_signup', 'event_registration',
 API_KEY = "94c3333a8e224b32b93a40788d1927cc"
 
 
-class DataGeneration(IterableAPI):
+class DataGeneration(IterableApi):
 	'''
 	docstring for DataGeneration
 	'''
 	def __init__(self, users=0, events=0):
 		
-		IterableAPI.__init__(self, api_key=API_KEY)
+		IterableApi.__init__(self, api_key=API_KEY)
 		self.users = users
 		self.events = events
 
@@ -85,7 +85,7 @@ class DataGeneration(IterableAPI):
 		return self.update_cart(user=commerce_data["user"],
 							    items=commerce_data["items"])
 
-		for i in commerce_data
+		
 
 	def generate_puchase_requests(self):
 
@@ -97,7 +97,7 @@ class DataGeneration(IterableAPI):
 
 	
 
-data= DataGeneration(users=1, events=1)
+data= DataGeneration()
 
 #print(data.generate_users())
 
@@ -107,9 +107,9 @@ data= DataGeneration(users=1, events=1)
 
 # data.generate_items_in_cart()
 
-# data.generate_puchase_requests()
+data.generate_puchase_requests()
 
-data.generate_events()
+# data.generate_events()
 
 
 
