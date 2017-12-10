@@ -140,9 +140,9 @@
 
 from unittest import mock 
 
-import iterable_wrapper
+from .wrapper.iterable_wrapper import IterableAPI
 
-@mock.patch("iterable_wrapper")
+@mock.patch("IterableApi")
 def mock_IterableAPI(mock_class):
 
 	print(mock_class)

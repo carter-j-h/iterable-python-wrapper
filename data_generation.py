@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 from faker import Faker
 
-from iterable_wrapper import IterableApi
+from pythonwrapper.iterable_wrapper import IterableApi
 
 #load some of my test json data for easy testing
 commerce_data = json.load(open('json_data/shopping_cart.json'))

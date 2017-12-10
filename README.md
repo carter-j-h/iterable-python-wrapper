@@ -12,7 +12,7 @@ pip install -r requirements.txt
 ## Usage:
 
 ```python
-from iterable_wrapper import IterableAPI
+from wrapper.iterable_wrapper import IterableAPI
 
 APIKEY="ENTER YOUR API CREDENTIALS HERE"
 

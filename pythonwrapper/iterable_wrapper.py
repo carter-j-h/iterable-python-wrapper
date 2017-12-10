@@ -63,11 +63,11 @@ class IterableApi():
 							 headers=headers, data=data, json=json)
 
 		if (r.status_code == 200):
-			# return r.json()
+			
 			return r.json()
 
 		else:
-			print(r.status_code)
+			return r.status_code
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -147,16 +147,9 @@ class IterableApi():
 			payload["endDateTime"]= end_date_time
 		else:
 			raise TypeError('End date is in incorrect format')
-		
-		# if start_date_time is not None:
-		# 	payload["startDateTime"]= str(start_date_time)
-
-		# if end_date_time is not None:
-		# 	payload["endDateTime"]= str(end_date_time)
 
 		if use_new_format is not None:
 			payload["useNewFormat"]= use_new_format
-
 
 		return self.api_call(call=call, method="GET", params=payload)
 
@@ -165,7 +158,6 @@ class IterableApi():
 		call = "/api/campaigns/recurring/"+str(campaign_id)+"/childCampaigns"
 
 		return self.api_call(call=call, method="GET")
-
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -194,6 +186,7 @@ class IterableApi():
 
 		payload ={}
 	
+		# payload["user"]= user
 		if isinstance(user, dict):
 			payload["user"]= user
 		else:
@@ -234,7 +227,6 @@ class IterableApi():
 		else:
 			raise Exception('user is not in Dictionary format')
 
-
 		if isinstance(items, list):
 			payload["items"]= items
 		else:
@@ -248,10 +240,10 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_email(self, campaign_id, recipient_email=None,
-				   data_fields=None, send_at=None,
-				   allow_repeat_marketing_sends=None, metadata=None,
-				   message_medium=None, icon_class=None, name=None):
+	def send_email(self, campaign_id, recipient_email,
+				   message_medium, data_fields=None,
+				   send_at=None, allow_repeat_marketing_sends=None,
+				   metadata=None):
 
 		call="/api/email/target"
 
@@ -260,6 +252,11 @@ class IterableApi():
 		payload["campaignId"]= campaign_id
 
 		payload["recipientEmail"]= str(recipient_email)
+
+		if isinstance(message_medium, dict):
+			payload["messageMedium"]= message_medium
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		if data_fields is not None:
 			payload["dataFields"]= data_fields
@@ -271,26 +268,19 @@ class IterableApi():
 			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
 
 		if metadata is not None:
-			payload["metadata"]= metadata
-
-		if isinstance(message_medium, dict):
-			payload["messageMedium"]= message_medium
-		else:
-			raise Exception('message medium is not in Dictionary format')
+			payload["metadata"]= metadata		
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def view_email_in_browser(self, email=None, message_id=None):
+	def view_email_in_browser(self, email, message_id):
 
 		call = "/api/email/viewInBrowser"
 
 		payload ={}
 
-		if email is not None:
-			payload["email"]= email
+		payload["email"]= str(email)
 
-		if message_id is not None:
-			payload["messageId"]= message_id
+		payload["messageId"]= str(message_id)
 
 		return self.api_call(call=call, method="GET", params=payload)
 
@@ -300,24 +290,25 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_events(self, email=None, limit=None):
+	def get_events(self, email, limit=None):
 
 		call="/api/events/"+str(email)
 
 		payload={}
 
-		if (limit is not None
-		 		and limit < 200):
+		if (limit is not None and limit <= 200):
 			payload["limit"]= limit
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def consume_in_app_notification(self, email=None, user_id=None,
-									message_id=None, button_index=None):
+	def consume_in_app_notification(self, message_id, email=None,
+									user_id=None, button_index=None):
 
 		call = "/api/events/inAppConsume"
 
 		payload ={}
+
+		payload["messageId"]= str(message_id)
 
 		if email is not None:
 			payload["email"]=email
@@ -325,15 +316,12 @@ class IterableApi():
 		if user_id is not None:
 			payload["userId"]=user_id
 
-		if message_id is not None:
-			payload["messageId"]= message_id
-
 		if button_index is not None:
 			payload["buttonIndex"]= button_index
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_event(self, email=None, event_name=None, created_at=None,
+	def track_event(self, event_name, email=None, created_at=None,
 					data_fields=None, user_id=None, campaign_id=None,
 					template_id=None):
 
@@ -341,11 +329,10 @@ class IterableApi():
 
 		payload={}
 
+		payload["eventName"]= str(event_name)
+
 		if email is not None:
 			payload["email"]=email
-
-		if event_name is not None:
-			payload["eventName"]=event_name
 
 		if created_at is not None:
 			payload["createdAt"]=created_at
@@ -364,49 +351,47 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_in_app_click(self, email=None, user_id=None,
-						   message_id=None, button_index=None):
+	def track_in_app_click(self, message_id, email=None,
+						   user_id=None, button_index=None):
 
 		call="/api/events/trackInAppClick"
 
 		payload={}
 
+		payload["messageId"]= str(message_id)
+
 		if email is not None:
 			payload["email"]= email
 
 		if user_id is not None:
 			payload["userId"]=user_id
 
-		if message_id is not None:
-			payload["messageId"]=message_id
-
 		if button_index is not None:
 			payload["buttonIndex"]=button_index
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_in_app_open(self, email=None, user_id=None, message_id=None,
-						  button_index=None):
+	def track_in_app_open(self, message_id, email=None,
+						  user_id=None, button_index=None):
 
 		call="/api/events/trackInAppOpen"
 
 		payload={}
 
+		payload["messageId"]=str(message_id)
+
 		if email is not None:
 			payload["email"]= email
 
 		if user_id is not None:
 			payload["userId"]=user_id
 
-		if message_id is not None:
-			payload["messageId"]=message_id
-
 		if button_index is not None:
 			payload["buttonIndex"]=button_index
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_push_open(self, email=None, user_id=None, campaign_id=None,
+	def track_push_open(self,  campaign_id,email=None, user_id=None,
 						template_id=None, message_id=None, created_at=None,
 						data_fields=None):
 
@@ -414,14 +399,13 @@ class IterableApi():
 
 		payload={}
 
+		payload["CampaignId"]= campaign_id
+
 		if email is not None:
 			payload["email"]=email
 
 		if user_id is not None:
 			payload["userId"]=user_id
-
-		if campaign_id is not None:
-			payload["CampaignId"]= campaign_id
 
 		if template_id is not None:
 			payload["templateId"]=template_id
@@ -445,14 +429,13 @@ class IterableApi():
 
 		payload={}
 
+		payload["messageId"]=str(message_id)
+
 		if email is not None:
 			payload["email"]=email
 
 		if user_id is not None:
 			payload["userId"]=user_id
-
-		if message_id is not None:
-			payload["messageId"]=message_id
 
 		if campaign_id is not None:
 			payload["campaignId"]=campaign_id
@@ -497,7 +480,9 @@ class IterableApi():
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 	def export_data_csv(self, data_type_name=None, date_range=None,
-						delimiter=None):
+						delimiter=None, start_date_time=None,
+						end_date_time=None, omit_fields=None,
+						only_fields=None, campaign_id=None):
 
 		call="/api/export/data.csv"
 
@@ -512,10 +497,27 @@ class IterableApi():
 		if delimiter is not None:
 			payload["delimiter"]= delimiter
 
+		if start_date_time is not None:
+			payload["startDateTime"]= start_date_time
+
+		if end_date_time is not None:
+			payload["endDateTime"]= end_date_time
+
+		if omit_fields is not None:
+			payload["omitFields"]= omitFields
+
+		if only_fields is not None and isinstance(only_fields, list):
+			payload["onlyFields"]= only_fields
+
+		if campaign_id is not None:
+			payload["campaignId"]= campaign_id
+
 		return self.api_call(call=call, method="GET", params=payload)
 
 	def export_data_json(self, data_type_name=None, date_range=None,
-						 delimiter=None):
+						delimiter=None, start_date_time=None,
+						end_date_time=None, omit_fields=None,
+						only_fields=None, campaign_id=None):
 
 		call="/api/export/data.json"
 
@@ -530,8 +532,22 @@ class IterableApi():
 		if delimiter is not None:
 			payload["delimiter"]= delimiter
 
-		return self.api_call(call=call, method="GET", params=payload)
+		if start_date_time is not None:
+			payload["startDateTime"]= start_date_time
 
+		if end_date_time is not None:
+			payload["endDateTime"]= end_date_time
+
+		if omit_fields is not None:
+			payload["omitFields"]= omitFields
+
+		if only_fields is not None and isinstance(only_fields, list):
+			payload["onlyFields"]= only_fields
+
+		if campaign_id is not None:
+			payload["campaignId"]= campaign_id
+
+		return self.api_call(call=call, method="GET", params=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
@@ -539,21 +555,19 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_in_app_messages(self, email=None, user_id=None, count=None,
+	def get_in_app_messages(self, email, count, user_id=None,
 							platform=None, sdk_version=None):
 
 		call = "/api/inApp/getMessages"
 
 		payload={}
 
-		if email is not None:
-			payload["email"]=str(email)
+		payload["email"]=str(email)
+
+		payload["count"]= count
 
 		if user_id is not None:
-			payload["userId"]=str(user_id)
-
-		if count is not None:
-			payload["count"]=count
+			payload["userId"]=str(user_id)	
 
 		if platform is not None:
 			payload["platform"]=str(platform)
@@ -563,20 +577,23 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def send_in_app_notification(self, campaign_id=None, recipient_email=None,
-								 data_fields=None, send_at=None,
-								 message_medium=None,
+	def send_in_app_notification(self, campaign_id, recipient_email,
+								 message_medium, data_fields=None,
+								 send_at=None,								 
 								 allow_repeat_marketing_sends=None):
 
 		call="/api/inApp/target"
 
 		payload={}
 
-		if campaign_id is not None:
-			payload["campaignId"]=campaign_id
+		payload["campaignId"]=campaign_id
 
-		if recipient_email is not None:
-			payload["recipientEmail"]=recipient_email
+		payload["recipientEmail"]=recipient_email
+
+		if isinstance(message_medium, dict):
+			payload["messageMedium"]= message_medium
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		if data_fields is not None:
 			payload["dataFields"]=data_fields
@@ -586,9 +603,6 @@ class IterableApi():
 
 		if allow_repeat_marketing_sends is not None:
 			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
-
-		if message_medium is not None:
-			payload["messageMedium"]=message_medium
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -605,66 +619,68 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET")
 
-	def create_list(self, list_name=None):
+	def create_list(self, list_name):
 
 		call = "/api/lists"
 
 		payload ={}
 
-		if list_name is not None:
-			payload["name"]= list_name
+		payload["name"]= str(list_name)
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def delete_static_list(self, list_id=None):
+	def delete_static_list(self, list_id):
 
 		call = "/api/lists/"+str(list_id)
 
 		return self.api_call(call=call, method="DELETE")
 
-	def number_of_users_in_list(self, list_id=None):
+	def number_of_users_in_list(self, list_id):
 
 		call = "/api/lists/"+str(list_id)+"/size"
 
 		return self.api_call(call=call, method="GET")
 
-	def get_users_in_list(self, list_id=None):
+	def get_users_in_list(self, list_id):
 
 		call = "/api/lists/getUsers"
 
 		payload ={}
 
-		if list_id is not None:
-			payload["listId"]= list_id
+		payload["listId"]= list_id
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def add_subscribers_to_list(self, list_id=None, subscribers=None):
+	def add_subscribers_to_list(self, list_id, subscribers):
 
 		call = "/api/lists/subscribe"
 
 		payload = {}
 
-		if list_id is not None:
-			payload["listId"]= list_id
+		payload["listId"]= list_id
 
-		if subscribers is not None:
+		if isinstance(subscribers, list):
 			payload["subscribers"]= subscribers
+
+		else:
+			raise TypeError('subscribers are not stored in list format')
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def remove_subscribers_to_list(self, list_id=None, subscribers=None,
+	def remove_subscribers_to_list(self, list_id, subscribers,
 								   campaign_id=None, channel_unsubscribe=False):
 
 		call = "/api/lists/unsubscribe"
 
 		payload = {}
 
-		if list_id is not None:
-			payload["listId"]= list_id
+		payload["listId"]= list_id
 
-		if subscribers is not None:
+		if isinstance(subscribers, list):
 			payload["subscribers"]= subscribers
+
+		else:
+			raise TypeError('subscribers are not stored in list format')
 
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
@@ -700,17 +716,15 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET")
 
-	def delete_all_metadata_from_table(self, table=None):
+	def delete_all_metadata_from_table(self, table):
 
-		if table is not None:
-			call="/api/metadata"+str(table)
+		call="/api/metadata"+str(table)
 
 		return self.api_call(call=call, method="DELETE")
 
-	def list_keys_in_table(self, table=None, next_marker=None):
+	def list_keys_in_table(self, table, next_marker=None):
 
-		if table is not None:
-			call= "/api/metadata/"+str(table)
+		call= "/api/metadata/"+str(table)
 
 		payload ={}
 
@@ -719,29 +733,28 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def delete_single_metadata_key_value(self, table=None, key=None):
+	def delete_single_metadata_key_value(self, table, key):
 		
-		if table is not None and key is not None:
-			call="/api/metadata/"+ str(table) + "/" + str(key)
+		call="/api/metadata/"+ str(table) + "/" + str(key)
 
 		return self.api_call(call=call, method="DELETE")
 
-	def get_single_metadata_key_value(self, table=None, key=None):
+	def get_single_metadata_key_value(self, table, key):
 
-		if table is not None and key is not None:
-			call="/api/metadata/"+ str(table) + "/" + str(key)
+		call="/api/metadata/"+ str(table) + "/" + str(key)
 
 		return self.api_call(call=call, method="GET")
 
-	def create_or_replace_metadata(self, table=None, key=None, value=None):
+	def create_or_replace_metadata(self, table, key, value):
 
-		if table is not None and key is not None:
-			call="/api/metadata/"+ str(table) + "/" + str(key)
+		call="/api/metadata/"+ str(table) + "/" + str(key)
 
 		payload={}
 
-		if value is not None:
+		if isinstance(value, dict):
 			payload["value"]= value
+		else:
+			raise TypeError('value is not in object format')
 
 		return self.api_call(call=call, method="PUT", json=payload)
 
@@ -751,21 +764,24 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_push_notification(self, campaign_id=None, 
-							   recipient_email=None, data_fields=None,
+	def send_push_notification(self, campaign_id, recipient_email, 
+							   message_medium, data_fields=None,
 							   send_at=None, 
 							   allow_repeat_marketing_sends=None,
-							   message_medium=None):
+							   metadata=None):
 
 		call="/api/push/target"
 
 		payload={}
 
-		if campaign_id is not None:
-			payload["campaignId"]= campaign_id
+		payload["campaignId"]= campaign_id
 
-		if recipient_email is not None:
-			payload["recipientEmail"]= recipient_email
+		payload["recipientEmail"]= recipient_email
+
+		if isinstance(message_medium, dict):
+			payload["messageMedium"]= message_medium
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		if data_fields is not None:
 			payload["dataFields"]= data_fields
@@ -776,8 +792,8 @@ class IterableApi():
 		if allow_repeat_marketing_sends is not None:
 			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
 
-		if message_medium is not None:
-			payload["messageMedium"]= message_medium
+		if metadata is not None:
+			payload["metadata"]= metadata
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -787,21 +803,24 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_sms_message(self, campaign_id=None, 
-					     recipient_email=None, data_fields=None,
+	def send_sms_message(self, campaign_id, recipient_email, 
+					     message_medium, data_fields=None,
 					     send_at=None, 
 					     allow_repeat_marketing_sends=None,
-					     message_medium=None):
+					     ):
 
 		call="/api/sms/target"
 
 		payload={}
 
-		if campaign_id is not None:
-			payload["campaignId"]= campaign_id
+		payload["campaignId"]= campaign_id
 
-		if recipient_email is not None:
-			payload["recipientEmail"]= recipient_email
+		payload["recipientEmail"]= recipient_email
+
+		if isinstance(message_medium, dict):
+			payload["messageMedium"]= message_medium
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		if data_fields is not None:
 			payload["dataFields"]= data_fields
@@ -810,10 +829,7 @@ class IterableApi():
 			payload["sendAt"]= send_at
 
 		if allow_repeat_marketing_sends is not None:
-			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
-
-		if message_medium is not None:
-			payload["messageMedium"]= message_medium
+			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends		
 
 		return self.api_call(call=call, method="POST", json=payload) 
 
@@ -852,21 +868,20 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def get_email_template(self, template_id=None, locale=None):
+	def get_email_template(self, template_id, locale=None):
 
 		call="/api/templates/email/get"
 
 		payload={}
 
-		if template_id is not None:
-			payload["templateId"]=template_id
+		payload["templateId"]=template_id
 
 		if locale is not None:
 			payload["locale"]= locale
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def update_email_template(self, template_id=None, metadata=None,
+	def update_email_template(self, template_id, metadata=None,
 							  name=None, from_name=None, from_email=None,
 							  reply_to_email=None, subject=None,
 							  preheader_text=None, cc_emails=None,
@@ -884,8 +899,7 @@ class IterableApi():
 
 		payload={}
 
-		if template_id is not None:
-			payload["templateId"]= template_id
+		payload["templateId"]= template_id
 
 		if metadata is not None:
 			payload["metadata"]= metadata
@@ -949,7 +963,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def upsert_email_template(self, client_template_id=None,
+	def upsert_email_template(self, client_template_id,
 							  name=None, from_name=None, from_email=None,
 							  reply_to_email=None, subject=None,
 							  preheader_text=None, cc_emails=None,
@@ -966,8 +980,7 @@ class IterableApi():
 
 		payload={}
 
-		if client_template_id is not None:
-			payload["clientTemplateId"]= client_template_id
+		payload["clientTemplateId"]= str(client_template_id)
 
 		if name is not None:
 			payload["name"]= name
@@ -1025,32 +1038,30 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def get_email_template(self, client_template_id=None):
+	def get_email_template(self, client_template_id):
 
 		call="/api/templates/getClientTemplateId"
 
 		payload={}
 
-		if client_template_id is not None:
-			payload["clientTemplateId"]= client_template_id
+		payload["clientTemplateId"]= client_template_id
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def get_push_template(self, template_id=None, locale=None):
+	def get_push_template(self, template_id, locale=None):
 
 		call="/api/templates/push/get"
 
 		payload={}
 
-		if template_id is not None:
-			payload["templateId"]= template_id
+		payload["templateId"]= template_id
 
 		if locale is not None:
 			payload["locale"]= locale
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def update_push_template(self, template_id=None, created_at=None,
+	def update_push_template(self, template_id, created_at=None,
 							 updated_at=None, name=None, message=None,
 							 payload_content=None, badge=None, locale=None,
 							 message_type_id=None, sound=None,
@@ -1061,8 +1072,7 @@ class IterableApi():
 
 		payload = {}
 
-		if template_id is not None:
-			payload["templateId"]= template_id
+		payload["templateId"]= template_id
 
 		if created_at is not None:
 			payload["createdAt"]= created_at
@@ -1102,7 +1112,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def upsert_push_template(self, client_template_id=None, name=None,
+	def upsert_push_template(self, client_template_id, name=None,
 							 message=None, payload_content=None, 
 							 badge=None, locale=None,
 							 message_type_id=None, sound=None,
@@ -1112,8 +1122,7 @@ class IterableApi():
 
 		payload = {}
 
-		if client_template_id is not None:
-			payload["clientTemplateId"]= client_template_id
+		payload["clientTemplateId"]= client_template_id
 
 		if name is not None:
 			payload["name"]= name
@@ -1144,21 +1153,20 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def get_sms_template(self, template_id=None, locale=None):
+	def get_sms_template(self, template_id, locale=None):
 
 		call="/api/templates/sms/get"
 
 		payload={}
 
-		if template_id is not None:
-			payload["templateId"]= template_id
+		payload["templateId"]= template_id
 
 		if locale is not None:
 			payload["locale"]= locale
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def update_sms_template(self, template_id=None, created_at=None,
+	def update_sms_template(self, template_id, created_at=None,
 							updated_at=None, name=None, message=None,
 							locale=None, message_type_id=None,
 							image_url=None, client_template_id=None,
@@ -1168,8 +1176,7 @@ class IterableApi():
 
 		payload= {}
 
-		if template_id is not None:
-			payload["templateId"]= template_id
+		payload["templateId"]= template_id
 
 		if created_at is not None:
 			payload["createdAt"]= created_at
@@ -1201,7 +1208,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 
-	def upsert_sms_template(self, client_template_id=None,
+	def upsert_sms_template(self, client_template_id,
 							name=None, message=None, locale=None,
 							message_type_id=None, image_url=None,
 							campaign_id=None):
@@ -1210,8 +1217,7 @@ class IterableApi():
 
 		payload= {}
 
-		if client_template_id is not None:
-			payload["clientTemplateId"]= client_template_id
+		payload["clientTemplateId"]= client_template_id
 
 		if name is not None:
 			payload["name"]= name
@@ -1242,7 +1248,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def delete_user(self, email=None):
+	def delete_user(self, email):
 	
 		"""
 		This call will delete a user from the Iterable database.  
@@ -1250,16 +1256,14 @@ class IterableApi():
 		in this case, which is why we're just adding this to the 'call'
 		argument that goes into the 'api_call' request. 		
 		"""
-		if email is not None:
-			call = "/api/users/"+ str(email)
+		call = "/api/users/"+ str(email)
 
 		return self.api_call(call=call, method="DELETE")
 
-	def get_user_by_email(self, email=None):
+	def get_user_by_email(self, email):
 		"""This function gets a user's data field and info"""
 
-		if email is not None:
-			call = "/api/users/"+ str(email)
+		call = "/api/users/"+ str(email)
 
 		return self.api_call(call=call, method="GET")
 
@@ -1279,48 +1283,49 @@ class IterableApi():
 		
 		payload = {}
 
-		if users is not None:
-			payload["users"] = users		
+		if isinstance(users, list):
+			payload["users"] = users
+		else:
+			raise TypeError ('users are not in Arrary format')		
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def bulk_update_subscriptions(self, update_subscriptions_requests=None):
+	def bulk_update_subscriptions(self, update_subscriptions_requests):
 
 		call ="/api/users/bulkUpdateSubscriptions"
 
 		payload = {}
 
-		if update_subscriptions_requests is not None:
+		if isinstance(update_subscriptions_requests, list):
 			payload["updateSubscriptionsRequests"] = update_subscriptions_requests
+		else:
+			raise TypeError ('subscription requests are not in Arrary format')	
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def get_users_by_userid(self, user_id=None):
+	def get_users_by_userid(self, user_id):
 
 		call = "/api/users/byUserId"
 
 		payload ={}
 
-		if user_id is not None:
-			payload["userId"] = user_id
+		payload["userId"] = str(user_id)
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def delete_users_by_userid_userid(self, user_id=None):
+	def delete_users_by_userid_userid(self, user_id):
 
-		if user_id is not None:
-			call = "/api/users/byUserId/"+str(user_id)			
+		call = "/api/users/byUserId/"+str(user_id)			
 
 		return self.api_call(call=call, method="DELETE")
 
 	def get_users_by_userid_userid(self, user_id):
 
-		if user_id is not None:
-			call = "/api/users/byUserId/" + str(user_id)
+		call = "/api/users/byUserId/" + str(user_id)
 
 		return self.api_call(call=call, method="GET")
 
-	def disable_device(self, token=None, email=None, user_id=None):
+	def disable_device(self, token, email=None, user_id=None):
 		"""
 		This request manually disable pushes to a device until it comes
 		online again.
@@ -1331,8 +1336,7 @@ class IterableApi():
 
 		payload ={}
 
-		if token is not None:
-			payload["token"] = str(token)
+		payload["token"] = str(token)
 
 		if email is not None:	
 			payload["email"] = str(email)
@@ -1342,14 +1346,13 @@ class IterableApi():
 
 		return self.api_call(call= call, method="POST", json=payload)
 
-	def get_user_by_email(self, email=None):
+	def get_user_by_email(self, email):
 
 		call = "/api/users/getByEmail"
 
 		payload = {}
 
-		if email is not None:
-			payload["email"]= email
+		payload["email"]= str(email)
 
 		return self.api_call(call=call, method="GET", params=payload)
 
@@ -1359,7 +1362,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET")
 
-	def get_sent_messages(self, email=None, user_id=None, limit=None,
+	def get_sent_messages(self, email=None, user_id=None, limit=10,
 						  campaign_id=None, start_date_time=None,
 						  end_date_time=None, exclude_blast_campaigns=None,
 						  message_medium=None):
@@ -1382,7 +1385,7 @@ class IterableApi():
 		if user_id is not None:
 			payload["userId"]= str(user_id)
 
-		if limit is not None:
+		if limit is not None and limit <=1000:
 			payload["limit"]= int(limit)
 
 		if campaign_id is not None:
@@ -1402,36 +1405,34 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET", params=payload)
 
-	def register_browser_token(self, email=None, browser_token=None,
+	def register_browser_token(self, browser_token, email=None,
 							   user_id=None):
 
 		call = "/api/users/registerBrowserToken"
 
 		payload= {}
 
+		payload["browserToken"] = str(browser_token)
+
 		if email is not None:
 			payload["email"]= email
-
-		if browser_token is not None:
-			payload["browserToken"] = browser_token
 
 		if user_id is not None:
 			payload["userId"]= user_id
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def register_device_token(self, email=None, device_token=None,
+	def register_device_token(self, device_token, email=None,
 							  user_id=None):
 
 		call = "/api/users/registerDeviceToken"
 
 		payload = {}
 
+		payload["device"] = device_token
+
 		if email is not None:
 			payload["email"]= email
-
-		if device_token is not None:
-			payload["device"] = device_token
 
 		if user_id is not None:
 			payload["userId"] = user_id
@@ -1474,21 +1475,19 @@ class IterableApi():
 		
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def update_email(self, current_email=None, new_email=None):
+	def update_email(self, current_email, new_email):
 
 		call = "/api/users/updateEmail"
 
 		payload = {}
 
-		if current_email is not None:
-			payload["currentEmail"] = current_email
+		payload["currentEmail"] = str(current_email)
 
-		if new_email is not None:
-			payload["newEmail"] = new_email
+		payload["newEmail"] = str(new_email)
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def update_subscriptions(self, email=None, email_list_ids=None,
+	def update_subscriptions(self, email, email_list_ids=None,
 							 unsubscribed_channel_ids=None,
 							 unsubscribed_message_type_ids=None,
 							 campaign_id=None, template_id=None):
@@ -1497,8 +1496,7 @@ class IterableApi():
 
 		payload ={}
 
-		if email is not None:
-			payload["email"]= email
+		payload["email"]= email
 
 		if email_list_ids is not None:
 			payload["emailListIds"]
@@ -1523,21 +1521,23 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_web_push_notification(self, campaign_id=None, 
-							       recipient_email=None, data_fields=None,
+	def send_web_push_notification(self, campaign_id, recipient_email,
+								   message_medium, data_fields=None,
 							       send_at=None, 
-							       allow_repeat_marketing_sends=None,
-							       message_medium=None):
+							       allow_repeat_marketing_sends=None):
 
 		call="/api/webPush/target"
 
 		payload={}
 
-		if campaign_id is not None:
-			payload["campaignId"]= campaign_id
+		payload["campaignId"]= campaign_id
 
-		if recipient_email is not None:
-			payload["recipientEmail"]= recipient_email
+		payload["recipientEmail"]= recipient_email
+
+		if isinstance(message_medium, dict):
+			payload["messageMedium"]= message_medium
+		else:
+			raise Exception('message medium is not in Dictionary format')
 
 		if data_fields is not None:
 			payload["dataFields"]= data_fields
@@ -1548,9 +1548,6 @@ class IterableApi():
 		if allow_repeat_marketing_sends is not None:
 			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
 
-		if message_medium is not None:
-			payload["messageMedium"]= message_medium
-
 		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -1559,18 +1556,17 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def trigger_workflow(self, email=None, workflow_id=None,
+	def trigger_workflow(self, workflow_id, email=None, 
 						 data_fields=None, list_id=None):
 
 		call="/api/workflows/triggerWorkflow"
 
 		payload={}
 
+		payload["workflowId"]= workflow_id
+
 		if email is not None:
 			payload["email"]= email
-
-		if workflow_id is not None:
-			payload["workflowId"]= workflow_id
 
 		if data_fields is not None:
 			payload["dataFields"]=data_fields
