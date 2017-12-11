@@ -6,3 +6,4 @@
 /csv_data
 /dist
 MANIFEST
+data_generation.py
