@@ -140,9 +140,9 @@
 
 from unittest import mock 
 
-from .wrapper.iterable_wrapper import IterableAPI
+from pythonwrapper.iterable_wrapper import IterableApi
 
-@mock.patch("IterableApi")
+@mock.patch('pythonwrapper.iterable_wrapper.IterableApi')
 def mock_IterableAPI(mock_class):
 
 	print(mock_class)
@@ -150,7 +150,7 @@ def mock_IterableAPI(mock_class):
 
 	API_KEY= "94c3333a8e224b32b93a40788d1927cc"
 
-	ic = iterable_wrapper.IterableAPI(api_key=API_KEY)
+	ic = IterableAPI(api_key=API_KEY)
 	print(ic)
 	
 	print(mock_class.return_value)
