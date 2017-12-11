@@ -8,7 +8,7 @@ Originally developed by Carter Hickingbotham.
 
 setup(
 	name='iterablepythonwrapper',
-	url='https://github.com/carter-j-h/IterableWrapper',
+	url='https://github.com/carter-j-h/iterable-python-wrapper',
 	author='Carter Hickingbotham',
 	author_email= 'carterhickingbotham@gmail.com',
 	license= 'MIT'
