@@ -11,8 +11,8 @@ setup(
 	url='https://github.com/carter-j-h/iterable-python-wrapper',
 	author='Carter Hickingbotham',
 	author_email= 'carterhickingbotham@gmail.com',
-	license= 'MIT'
-	version= '0.1',
+	license= 'MIT',
+	version='0.1',
 	scripts=['pythonwrapper'],
 	keywords = ['Iterable', 'API', 'Wrapper', 'Client', 'Python'],
     description='Python Client for the Iterable Api',
