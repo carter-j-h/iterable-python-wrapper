@@ -98,7 +98,6 @@ class IterableApi():
 		else:
 			raise TypeError('ListIds are not in the required Array format')
 
-
 		payload["template_id"]= template_id
 
 		if suppression_list_ids is not None:
@@ -118,7 +117,6 @@ class IterableApi():
 
 		if data_fields is not None:
 			payload["dataField"]= data_fields
-
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -186,7 +184,6 @@ class IterableApi():
 
 		payload ={}
 	
-		# payload["user"]= user
 		if isinstance(user, dict):
 			payload["user"]= user
 		else:
@@ -471,7 +468,6 @@ class IterableApi():
 			payload["endDateTime"]=end_date_time
 
 		return self.api_call(call=call, method="GET", params=payload)
-
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
@@ -894,7 +890,6 @@ class IterableApi():
 							  client_template_id=None, locale=None,
 							  message_type_id=None, creator_user_id=None):
 
-
 		call="/api/templates/email/update"
 
 		payload={}
@@ -1207,7 +1202,6 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-
 	def upsert_sms_template(self, client_template_id,
 							name=None, message=None, locale=None,
 							message_type_id=None, image_url=None,
@@ -1237,9 +1231,7 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.api_call(call=call, method="POST", json=payload)
-
-			
+		return self.api_call(call=call, method="POST", json=payload)			
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
