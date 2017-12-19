@@ -98,7 +98,7 @@ class IterableApi():
 		else:
 			raise TypeError('ListIds are not in the required Array format')
 
-		payload["template_id"]= template_id
+		payload["templateId"]= template_id
 
 		if suppression_list_ids is not None:
 			payload["supressionListIds"]= suppression_list_ids

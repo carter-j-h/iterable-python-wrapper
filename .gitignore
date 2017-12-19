@@ -2,8 +2,12 @@
 *__pycache__
 *.pyc
 .DS_Store
-/json_data
+
+/build
 /csv_data
 /dist
+/iterablepythonwrapper.egg-info
+/json_data
+
 MANIFEST
 data_generation.py
