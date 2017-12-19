@@ -86,7 +86,7 @@ class IterableApi():
 						send_mode=None, start_time_zone=None,
 						default_time_zone=None, data_fields=None):
 
-		call = "/api/capaigns/create"
+		call = "/api/campaigns/create"
 
 		payload ={}
 
@@ -116,7 +116,7 @@ class IterableApi():
 			payload["defaultTimeZone"]= str(default_time_zone)
 
 		if data_fields is not None:
-			payload["dataField"]= data_fields
+			payload["dataFields"]= data_fields
 
 		return self.api_call(call=call, method="POST", json=payload)
 

@@ -89,6 +89,7 @@
 # import pytest
 
 # from iterable_wrapper import IterableAPI
+API_KEY= "94c3333a8e224b32b93a40788d1927cc"
 
 
 # @pytest.fixture
@@ -140,15 +141,14 @@
 
 from unittest import mock 
 
-from pythonwrapper.iterable_wrapper import IterableApi
+from iterablepythonwrapper.client import IterableApi
 
-@mock.patch('pythonwrapper.iterable_wrapper.IterableApi')
+@mock.patch('iterablepythonwrapper.client.IterableApi')
 def mock_IterableAPI(mock_class):
 
 	print(mock_class)
 	print(iterable_wrapper.IterableAPI)
 
-	API_KEY= "94c3333a8e224b32b93a40788d1927cc"
 
 	ic = IterableAPI(api_key=API_KEY)
 	print(ic)
