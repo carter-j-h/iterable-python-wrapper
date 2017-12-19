@@ -13,7 +13,7 @@ setup(
 	author='Carter Hickingbotham',
 	author_email='carterhickingbotham@gmail.com',
 	license= 'MIT',
-	version='0.2',	
+	version='0.3',	
 	install_requires=['peppercorn'],
 	keywords = ['Iterable', 'API', 'Wrapper', 'Client', 'Python'],
     description='Python Client for the Iterable Api',
