@@ -1,8 +1,14 @@
+attrs==17.3.0
 certifi==2017.11.5
 chardet==3.0.4
+coverage==4.4.2
 Faker==0.8.7
 idna==2.6
+nose2==0.7.2
 pkginfo==1.4.1
+pluggy==0.6.0
+py==1.5.2
+pytest==3.3.1
 python-dateutil==2.6.1
 requests==2.18.4
 requests-toolbelt==0.8.0
