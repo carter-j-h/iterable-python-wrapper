@@ -74,10 +74,10 @@ event_details= {
 }
 
 ic.track_event(email="abe.lincoln@usa.gov",
-			   event_name="app_login",
-			   dataFields=event_details,
-			   campaign_id=215,
-			   template_id= 1000)
+				event_name="app_login",
+				dataFields=event_details,
+				campaign_id=215,
+				template_id= 1000)
 ```
 
 ## Templates
@@ -85,12 +85,13 @@ ic.track_event(email="abe.lincoln@usa.gov",
 Upsert Email Template (https://api.iterable.com/api/docs#!/templates/upsertEmailTemplate)
 
 ```python
-ic.upsert_email_template(client_template_id=100000, name="New Email Template",
-						 from_name="Abe Lincoln",
-						 reply_to_email="abe.lincoln@usa.gov",
-					     subject="A word from Abe Lincoln!", 
-						 preheader_text="Abe wants You!",
-					     html=HTML_CONTENT_HERE)
+ic.upsert_email_template(client_template_id=100000,
+						name="New Email Template",
+						from_name="Abe Lincoln",
+						reply_to_email="abe.lincoln@usa.gov",
+						subject="A word from Abe Lincoln!", 
+						preheader_text="Abe wants You!",
+						html=HTML_CONTENT_HERE)
 ```
 
 ## Users
@@ -99,9 +100,9 @@ Update User (https://api.iterable.com/api/docs#!/users/updateUser)
 
 ```python
 ic.update_user(email="abe.lincoln@usa.gov",
-			   data_fields={"firstName":"Abe",
-			   				"lastName":"Lincoln",
-			   				"jobTitle": "16th President of the United States"})
+				data_fields={"firstName":"Abe",
+							"lastName":"Lincoln",
+							"jobTitle": "16th President of the United States"})
 
 ```
 
