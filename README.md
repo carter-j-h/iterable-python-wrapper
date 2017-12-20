@@ -69,12 +69,15 @@ ic.update_cart(user={"email": "john.doe@gmail.com"}, items=cart_items)
 Track Event: (https://api.iterable.com/api/docs#!/events/track)
 ```python
 event_details= {
-	"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X x.y; rv:42.0) Gecko/20100101 Firefox/42.0
-",
+	"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X; rv:42.0) Gecko/20100101 Firefox/42.0",
 	"referrer": "https://www.google.com"
-
 }
-ic.track_event(email="abe.lincoln@usa.gov", event_name="app_login", dataFields=event_details, campaign_id=215, template_id= 1000)
+
+ic.track_event(email="abe.lincoln@usa.gov",
+			   event_name="app_login",
+			   dataFields=event_details,
+			   campaign_id=215,
+			   template_id= 1000)
 ```
 
 ## Templates
@@ -83,10 +86,11 @@ Upsert Email Template (https://api.iterable.com/api/docs#!/templates/upsertEmail
 
 ```python
 ic.upsert_email_template(client_template_id=100000, name="New Email Template",
-									   from_name="Abe Lincoln", reply_to_email="abe.lincoln@usa.gov",
-									   subject="A word from Abe Lincoln!", 
-									   preheader_text="Abe wants You!",
-									   html=HTML_CONTENT_HERE)
+						 from_name="Abe Lincoln",
+						 reply_to_email="abe.lincoln@usa.gov",
+					     subject="A word from Abe Lincoln!", 
+						 preheader_text="Abe wants You!",
+					     html=HTML_CONTENT_HERE)
 ```
 
 ## Users
@@ -94,7 +98,10 @@ ic.upsert_email_template(client_template_id=100000, name="New Email Template",
 Update User (https://api.iterable.com/api/docs#!/users/updateUser)
 
 ```python
-ic.update_user(email="abe.lincoln@usa.gov", data_fields={"firstName":"Abe", "lastName":"Lincoln", "jobTitle": "16th President of the United States"})
+ic.update_user(email="abe.lincoln@usa.gov",
+			   data_fields={"firstName":"Abe",
+			   				"lastName":"Lincoln",
+			   				"jobTitle": "16th President of the United States"})
 
 ```
 
