@@ -62,12 +62,7 @@ class IterableApi():
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
 							 headers=headers, data=data, json=json)
 
-		if (r.status_code == 200):
-			
-			return r.json()
-
-		else:
-			return r.status_code
+		return r.json()
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
