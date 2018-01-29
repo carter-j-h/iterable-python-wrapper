@@ -12,11 +12,11 @@ pip3 install -r requirements.txt
 ## Usage:
 
 ```python
-from iterablepythonwrapper.client import IterableAPI
+from iterablepythonwrapper.client import IterableApi
 
 APIKEY="ENTER YOUR API CREDENTIALS HERE"
 
-ic = IterableAPI(api_key=APIKEY)
+ic = IterableApi(api_key=APIKEY)
 ```
 
 ## Campaigns
