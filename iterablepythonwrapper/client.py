@@ -839,18 +839,18 @@ class IterableApi():
 
 		payload={}
 
-		if template_type is ("Base" or "Blast" or "Triggered" or "Workflow"):
-			payload["templateType"]=template_type	
-
-		else:
+		if template_type is not None and template_type is not ("Base" or "Blast" or "Triggered" or "Workflow"):
+				
 			raise ValueError('You did not specify the correct template type')
-
-		if message_medium is ("Email" or "Push" or "InApp" or "SMS"):
-			payload["messageMedium"]=message_medium
-
 		else:
-			raise ValueError('You did not specify the correct message medium')
+			payload["templateType"]=template_type
 
+		if message_medium is not None and message_medium is not ("Email" or "Push" or "InApp" or "SMS"):
+			
+			raise ValueError('You did not specify the correct message medium')
+		else:			
+			payload["messageMedium"]=message_medium
+			
 		if start_date_time is not None:
 			payload["startDateTime"]=start_date_time
 
