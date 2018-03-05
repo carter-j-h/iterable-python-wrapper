@@ -61,8 +61,15 @@ class IterableApi():
 		# make the request following the 'requests.request' method
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
 							 headers=headers, data=data, json=json)
+		
+		response = {			
+			"body": r.json(),			
+			"code": r.status_code,
+			"headers": r.headers,
+			"url": r.url
+		}
 
-		return r.json()
+		return response
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
