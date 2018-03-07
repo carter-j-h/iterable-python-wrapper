@@ -3,11 +3,19 @@ Python Wrapper for the Iterable API, more details coming soon
 
 ## Installation
 
+```python
+
 pip3 install iterablepythonwrapper
+
+```
 
 ## Setup
 
+```python
+
 pip3 install -r requirements.txt
+
+```
 
 ## Usage:
 
