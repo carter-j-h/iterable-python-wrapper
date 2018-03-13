@@ -846,25 +846,29 @@ class IterableApi():
 
 		payload={}
 
-		if template_type is not None and template_type is not ("Base" or "Blast" or "Triggered" or "Workflow"):
-				
-			raise ValueError('You did not specify the correct template type')
-		else:
-			payload["templateType"]=template_type
+		iterable_template_types = ["Base", "Blast", "Triggered", "Workflow"]
 
-		if message_medium is not None and message_medium is not ("Email" or "Push" or "InApp" or "SMS"):
-			
-			raise ValueError('You did not specify the correct message medium')
-		else:			
-			payload["messageMedium"]=message_medium
+		iterable_message_mediums = ["Email", "Push", "InApp", "SMS"]
+
+		if template_type is not None and template_type in iterable_template_types:			
+			payload["templateType"]= template_type
+
+		elif template_type is not None and template_type not in iterable_template_types:
+			raise Exception("It looks like you listed an incorrect template type '%s'" % template_type)	
+
+		if message_medium is not None and message_medium in iterable_message_mediums:			
+			payload["messageMedium"]= message_medium		
+
+		elif message_medium is not None and message_medium not in iterable_message_mediums:
+			raise Exception("It looks like you listed an incorrect message medium '%s'" % message_medium)
 			
 		if start_date_time is not None:
-			payload["startDateTime"]=start_date_time
+			payload["startDateTime"]= start_date_time
 
 		if end_date_time is not None:
 			payload["endDateTime"]= end_date_time
 
-		return self.api_call(call=call, method="GET", params=payload)
+		return self.api_call(call = call, method = "GET", params = payload)
 
 	def get_email_template(self, template_id, locale=None):
 
