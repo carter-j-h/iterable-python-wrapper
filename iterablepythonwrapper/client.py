@@ -1,5 +1,6 @@
 import csv
 import json
+import re
 import requests
 import time
 
@@ -30,7 +31,7 @@ class IterableApi():
 		self.api_key = api_key
 
 	def api_call(self, call, method, params=None, headers=None, data=None,
-				 json=None):
+				 json=None, stream=None):
 		"""
 		This is our generic api call function.  We will route all our calls
 		through this function.  The benefit of this is that it:
@@ -53,15 +54,35 @@ class IterableApi():
 			data = {}
 		# json- data to be sent in body of Request
 		if json is None:
-			json ={}		
+			json ={}
+
+		if stream is None:
+			stream = False	
 		
 		headers["Content-type"] = "application/json"
 		headers["Api-Key"] = self.api_key
 
 		# make the request following the 'requests.request' method
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
-							 headers=headers, data=data, json=json)
+							 headers=headers, data=data, json=json, stream=stream)
 		
+		
+		# for export requests we are dealing with more data that isn't returned in
+		# json.  Therefore, we need to chunk the content and write it to a local
+		# file. 
+		if "export/data" in r.url:
+			if "csv" in r.url:
+				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.csv'
+			else:
+				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.json'
+
+			with open(local_filename, 'wb') as write_file:
+				for chunk in r.iter_content(chunk_size=1024):
+					if chunk:
+						write_file.write(chunk)
+
+		return local_filename		
+
 		response = {			
 			"body": r.json(),			
 			"code": r.status_code,
@@ -70,6 +91,7 @@ class IterableApi():
 		}
 
 		return response
+		
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -545,7 +567,7 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.api_call(call=call, method="GET", params=payload)
+		return self.api_call(call=call, method="GET", params=payload, stream=True)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
@@ -1574,6 +1596,14 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
+
+	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+	Utility Fuction for large file download
+
+	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+	
 
 
 

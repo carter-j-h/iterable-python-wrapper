@@ -11,3 +11,9 @@
 
 MANIFEST
 data_generation.py
+
+# Testing files
+/export.py
+/*.json
+/*.csv
+
