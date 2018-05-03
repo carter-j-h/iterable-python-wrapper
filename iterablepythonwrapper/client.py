@@ -21,25 +21,26 @@ class IterableApi():
 
 	def __init__(self, api_key):
 		"""
-		This preforms all initialization and stores the unique API key of the
-		Iterable instance. It also stores the base URI, which is consistent
-		for all instances.
+		This preforms the necessary initialization parameters for the
+		Iterable project. It stores the base URI, the API key for the 
+		project, and headers tha are consistent across all requests. 
 
 		"""
-		
-		self.base_uri = "https://api.iterable.com"		
 		self.api_key = api_key
+		self.base_uri = "https://api.iterable.com"
+		self.headers = {"Content-type": "application/json",
+						"Api-Key": self.api_key}		
 
 	def api_call(self, call, method, params=None, headers=None, data=None,
-				 json=None, stream=None):
+				 json=None):
 		"""
-		This is our generic api call function.  We will route all our calls
-		through this function.  The benefit of this is that it:
+		This is our generic api call function.  We will route all calls except
+		export GET requests through this function.  This is beneficial because:
 			1. Allows for easier debugging if a request fails
-			2. Even though the Iterable API only needs the API key for a 
-			security standpoint, if it were ever to require access token for 
-			each request we could easily manage the granting and expiration
-			management of such a token.  
+			2. Currently, the Iterable API only needs the API key for a 
+			security standpoint. In the future, if it were to require an  
+			access token for each request we could easily manage the granting
+			and expiration management of such a token.  
 
 		"""
 
@@ -56,32 +57,9 @@ class IterableApi():
 		if json is None:
 			json ={}
 
-		if stream is None:
-			stream = False	
-		
-		headers["Content-type"] = "application/json"
-		headers["Api-Key"] = self.api_key
-
 		# make the request following the 'requests.request' method
 		r = requests.request(method=method, url=self.base_uri+call, params=params,
-							 headers=headers, data=data, json=json, stream=stream)
-		
-		
-		# for export requests we are dealing with more data that isn't returned in
-		# json.  Therefore, we need to chunk the content and write it to a local
-		# file. 
-		if "export/data" in r.url:
-			if "csv" in r.url:
-				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.csv'
-			else:
-				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.json'
-
-			with open(local_filename, 'wb') as write_file:
-				for chunk in r.iter_content(chunk_size=1024):
-					if chunk:
-						write_file.write(chunk)
-
-		return local_filename		
+							 headers=self.headers, data=data, json=json)	
 
 		response = {			
 			"body": r.json(),			
@@ -91,7 +69,34 @@ class IterableApi():
 		}
 
 		return response
-		
+
+	def export_data_api(self, call,
+						params, path, 
+						chunk_size=None, 
+						return_iterator_object=None):
+
+		r = requests.request(method="GET", url=self.base_uri+call, params=params,
+							 headers=self.headers, stream=True)
+
+		if r.status_code == 200:
+			
+			if return_iterator_object is (not None and True):
+				print(r.url)
+				return r.iter_content(chunk_size=chunk_size)
+
+			if "csv" in r.url:
+				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.csv'
+			else:
+				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.json'
+
+			with open(path+local_filename, 'wb') as write_file:
+				
+				for chunk in r.iter_content(chunk_size=chunk_size):
+					if chunk:
+						write_file.write(chunk)
+			
+			return None
+
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -317,7 +322,7 @@ class IterableApi():
 
 		payload={}
 
-		if (limit is not None and limit <= 200):
+		if limit is not None and limit <= 200:
 			payload["limit"]= limit
 
 		return self.api_call(call=call, method="GET", params=payload)
@@ -502,7 +507,8 @@ class IterableApi():
 	def export_data_csv(self, data_type_name=None, date_range=None,
 						delimiter=None, start_date_time=None,
 						end_date_time=None, omit_fields=None,
-						only_fields=None, campaign_id=None):
+						only_fields=None, campaign_id=None,
+						path=None):
 
 		call="/api/export/data.csv"
 
@@ -524,7 +530,7 @@ class IterableApi():
 			payload["endDateTime"]= end_date_time
 
 		if omit_fields is not None:
-			payload["omitFields"]= omitFields
+			payload["omitFields"]= omit_fields
 
 		if only_fields is not None and isinstance(only_fields, list):
 			payload["onlyFields"]= only_fields
@@ -532,25 +538,55 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.api_call(call=call, method="GET", params=payload)
+		return self.export_data_api(call=call, params=payload, path=path)
 
-	def export_data_json(self, data_type_name=None, date_range=None,
+	def export_data_json(self, return_iterator_object, 
+						chunk_size=1024, 
+						path=None,
+						data_type_name=None, date_range=None,
 						delimiter=None, start_date_time=None,
 						end_date_time=None, omit_fields=None,
 						only_fields=None, campaign_id=None):
 
+		"""
+		Custom Keyword arguments:
+
+		1. return_iterator_object:
+			if set to 'True', the r.inter_content() object will be returned.  The
+			benefit of this is that you can manipulate the data in any way you
+			want.  If set to false, we will write the response to a file where each
+			Iterable activity you're exporting is a single-line JSON object.
+		2. chunk_size:
+			Chunk size is used as a paremeter in the r.iter_content(chunk_size) method
+			that controls how big the response chunks are (in bytes).  Depending on the
+			device used to make the request, this might change depending on the user. 
+			Default is set to 1 MB. 
+		3. path:
+			Allows you to choose the directory where the file is downloaded into.
+				Example: "/Users/username/Desktop/"
+			If not set the file will download into the current directory.
+			
+		"""
 		call="/api/export/data.json"
+
+		# make sure correct ranges are being used
+		date_ranges = ["Today", "Yesterday", "BeforeToday", "All"]		
+		
+		if isinstance(return_iterator_object, bool) is False:
+			raise ValueError("'return_iterator_object'parameter must be a boolean") 
+		
+		if chunk_size is not None and isinstance(chunk_size, int):
+			pass
+		else:
+			raise ValueError("'chunk_size' parameter must be a integer")
 
 		payload={}
 
 		if data_type_name is not None:
 			payload["dataTypeName"]= data_type_name
 
-		if date_range is not None:
+		if date_range is not None and date_range in date_ranges:
 			payload["range"]= date_range
-
-		if delimiter is not None:
-			payload["delimiter"]= delimiter
 
 		if start_date_time is not None:
 			payload["startDateTime"]= start_date_time
@@ -559,7 +595,7 @@ class IterableApi():
 			payload["endDateTime"]= end_date_time
 
 		if omit_fields is not None:
-			payload["omitFields"]= omitFields
+			payload["omitFields"]= omit_fields
 
 		if only_fields is not None and isinstance(only_fields, list):
 			payload["onlyFields"]= only_fields
@@ -567,7 +603,9 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.api_call(call=call, method="GET", params=payload, stream=True)
+		return self.export_data_api(call=call, chunk_size=chunk_size, 
+									params=payload, path=path,
+									return_iterator_object=return_iterator_object)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
