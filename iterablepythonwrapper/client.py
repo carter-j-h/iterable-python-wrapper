@@ -81,8 +81,9 @@ class IterableApi():
 		if r.status_code == 200:
 			
 			if return_iterator_object is (not None and True):
-				print(r.url)
-				return r.iter_content(chunk_size=chunk_size)
+				# print(r.url)
+				# return r.iter_content(chunk_size=chunk_size, decode_unicode=True)
+				return r
 
 			if "csv" in r.url:
 				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.csv'
