@@ -4,7 +4,9 @@ chardet==3.0.4
 coverage==4.4.2
 Faker==0.8.7
 idna==2.6
+iterablepythonwrapper==0.9
 nose2==0.7.2
+peppercorn==0.5
 pkginfo==1.4.1
 pluggy==0.6.0
 py==1.5.2

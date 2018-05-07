@@ -12,10 +12,10 @@ class IterableApi():
 	This is a python wrapper for the Iterable API
 
 	We are using the Requests HTTP python library, which I 
-	have found flexible in regards to the arguments you
-	can pass into each request.  Their documentation is 
-	also excellent.  This makes it must easier in the event I were to 
-	expand this wrapper to encompass all the possible Iterable API requests.
+	have found very flexible to accomodate the various methods
+	that customers leverage to interact with our API.  Their 
+	documentation is also excellent, enabling our team to 
+	quickly update this wrapper to support specific reqeusts.  
 
 	"""	
 
@@ -47,9 +47,6 @@ class IterableApi():
 		# params(optional) Dictionary or bytes to be sent in the query string for the Request.
 		if params is None:
 			params = {}
-		# headers- dictionary of HTTP Headers to be sent with Request
-		if headers is None:
-			headers = {}
 		# data- dict or list of tuples to be sent in body of Request
 		if data is None:
 			data = {}
@@ -73,16 +70,15 @@ class IterableApi():
 	def export_data_api(self, call,
 						params, path, 
 						chunk_size=None, 
-						return_iterator_object=None):
+						return_response_object=None):
 
 		r = requests.request(method="GET", url=self.base_uri+call, params=params,
 							 headers=self.headers, stream=True)
 
 		if r.status_code == 200:
 			
-			if return_iterator_object is (not None and True):
-				# print(r.url)
-				# return r.iter_content(chunk_size=chunk_size, decode_unicode=True)
+			if return_response_object is (not None and True):
+
 				return r
 
 			if "csv" in r.url:
@@ -96,8 +92,7 @@ class IterableApi():
 					if chunk:
 						write_file.write(chunk)
 			
-			return None
-
+			return True
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -541,7 +536,7 @@ class IterableApi():
 
 		return self.export_data_api(call=call, params=payload, path=path)
 
-	def export_data_json(self, return_iterator_object, 
+	def export_data_json(self, return_response_object, 
 						chunk_size=1024, 
 						path=None,
 						data_type_name=None, date_range=None,
@@ -552,8 +547,8 @@ class IterableApi():
 		"""
 		Custom Keyword arguments:
 
-		1. return_iterator_object:
-			if set to 'True', the r.inter_content() object will be returned.  The
+		1. return_response_object:
+			if set to 'True', the 'r' response object will be returned.  The
 			benefit of this is that you can manipulate the data in any way you
 			want.  If set to false, we will write the response to a file where each
 			Iterable activity you're exporting is a single-line JSON object.
@@ -573,7 +568,7 @@ class IterableApi():
 		# make sure correct ranges are being used
 		date_ranges = ["Today", "Yesterday", "BeforeToday", "All"]		
 		
-		if isinstance(return_iterator_object, bool) is False:
+		if isinstance(return_response_object, bool) is False:
 			raise ValueError("'return_iterator_object'parameter must be a boolean") 
 		
 		if chunk_size is not None and isinstance(chunk_size, int):
@@ -606,7 +601,7 @@ class IterableApi():
 
 		return self.export_data_api(call=call, chunk_size=chunk_size, 
 									params=payload, path=path,
-									return_iterator_object=return_iterator_object)
+									return_response_object=return_response_object)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
@@ -1634,13 +1629,6 @@ class IterableApi():
 			payload["listId"]= list_id
 
 		return self.api_call(call=call, method="POST", json=payload)
-
-
-	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-
-	Utility Fuction for large file download
-
-	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 	
 
