@@ -1,5 +1,5 @@
 # IterableWrapper
-Python Wrapper for the Iterable API, more details coming soon
+Python Wrapper for the Iterable API.  Current version is 0.9
 
 ## Installation
 
