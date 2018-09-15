@@ -11,34 +11,37 @@ class IterableApi():
 	"""
 	This is a python wrapper for the Iterable API
 
-	We are using the Requests HTTP python library, which I 
+	We are using the 'Requests' HTTP python library, which I 
 	have found very flexible to accomodate the various methods
-	that customers leverage to interact with our API.  Their 
+	that customers leverage to interact with our API.  'Requests' 
 	documentation is also excellent, enabling our team to 
-	quickly update this wrapper to support specific reqeusts.  
+	quickly update this wrapper to support a wide range of use cases.  
 
 	"""	
 
 	def __init__(self, api_key):
 		"""
 		This preforms the necessary initialization parameters for the
-		Iterable project. It stores the base URI, the API key for the 
-		project, and headers tha are consistent across all requests. 
+		Iterable API wrapper. It stores the base URI, the API key for the 
+		project, and headers that shoudl be consistent across all requests. 
 
 		"""
 		self.api_key = api_key
 		self.base_uri = "https://api.iterable.com"
-		self.headers = {"Content-type": "application/json",
-						"Api-Key": self.api_key}		
+		self.headers = {
+						"Content-type": "application/json",
+						"Api-Key": self.api_key
+						}		
 
 	def api_call(self, call, method, params=None, headers=None, data=None,
 				 json=None):
 		"""
 		This is our generic api call function.  We will route all calls except
-		export GET requests through this function.  This is beneficial because:
+		requests that do not return JSON ('Export' and 'Experiment Metrics' are
+		examples where this is the case).  This is beneficial because:
 			1. Allows for easier debugging if a request fails
-			2. Currently, the Iterable API only needs the API key for a 
-			security standpoint. In the future, if it were to require an  
+			2. Currently, Iterable only needs the API key from a security
+			standpoint. In the future, if it were to require an  
 			access token for each request we could easily manage the granting
 			and expiration management of such a token.  
 
@@ -81,10 +84,10 @@ class IterableApi():
 
 				return r
 
-			if "csv" in r.url:
-				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.csv'
+			if ("csv" or "experiment") in r.url:
+				local_filename = 'iterable_' + params['dataTypeName'] + str(round(time.time())) + '.csv'
 			else:
-				local_filename = 'iterableDataExport_' + str(round(time.time())) + '.json'
+				local_filename = 'iterable_' + params['dataTypeName'] + str(round(time.time())) + '.json'
 
 			with open(path+local_filename, 'wb') as write_file:
 				
@@ -201,7 +204,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def track_purchase(self, user, items, total, campaign_id=None, 
+	def track_purchase(self, user, items, total, purchase_id= None, campaign_id=None, 
 					   template_id=None, created_at=None,
 					   data_fields=None):
 
@@ -223,6 +226,9 @@ class IterableApi():
 			payload["total"]= total
 		else:
 			raise TypeError('total is not in correct format')
+
+		if purchase_id is not None:
+			payload["id"]= str(purchase_id) 
 
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
@@ -473,10 +479,15 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_experiment_metrics(self, experiment_id=None, campaign_id=None,
-							   start_date_time=None, end_date_time=None):
+	def get_experiment_metrics(self, path,
+							   experiment_id=None, campaign_id=None,
+							   start_date_time=None, end_date_time=None
+							   ):
 
 		call="/api/experiments/metrics"
+
+		if isinstance(return_response_object, bool) is False:
+			raise ValueError("'return_iterator_object'parameter must be a boolean") 
 
 		payload={}
 
@@ -492,7 +503,7 @@ class IterableApi():
 		if end_date_time is not None:
 			payload["endDateTime"]=end_date_time
 
-		return self.api_call(call=call, method="GET", params=payload)
+		return self.export_data_api(call=call, path=path, params=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
