@@ -1,6 +1,6 @@
 import csv
 import json
-import re
+import pdb
 import requests
 import time
 
@@ -84,9 +84,14 @@ class IterableApi():
 
 				return r
 
-			if ("csv" or "experiment") in r.url:
+
+			if "csv" in r.url:
 				local_filename = 'iterable_' + params['dataTypeName'] + str(round(time.time())) + '.csv'
-			else:
+			if "experiments" in r.url:
+				local_filename = 'iterable_experiment_ids_' + str(",".join(list(params.values()))) + "_" + str(round(time.time())) + '.csv'
+			if "userEvents" in r.url:
+				local_filename = 'iterable_user_events' + str(round(time.time())) + '.csv'
+			if "json" in r.url:
 				local_filename = 'iterable_' + params['dataTypeName'] + str(round(time.time())) + '.json'
 
 			with open(path+local_filename, 'wb') as write_file:
@@ -103,7 +108,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def list_campaign_info(self):
+	def list_campaign_metadata(self):
 
 		call="/api/campaigns"
 
@@ -192,7 +197,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def list_channels(self):
+	def get_channels(self):
 
 		call="/api/channels"
 
@@ -207,6 +212,11 @@ class IterableApi():
 	def track_purchase(self, user, items, total, purchase_id= None, campaign_id=None, 
 					   template_id=None, created_at=None,
 					   data_fields=None):
+		"""
+			The 'purchase_id' argument maps to 'id' for this API endpoint.
+			This name is used to distinguish it from other instances where
+			'id' is a part of the API request with other Iterable endpoints.
+		"""
 
 		call="/api/commerce/trackPurchase"
 
@@ -349,15 +359,18 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_event(self, event_name, email=None, created_at=None,
-					data_fields=None, user_id=None, campaign_id=None,
-					template_id=None):
+	def track_event(self, event_name, event_id=None, email=None, 
+					created_at=None, data_fields=None, user_id=None,
+					campaign_id=None,template_id=None):
 
 		call="/api/events/track"
 
 		payload={}
 
 		payload["eventName"]= str(event_name)
+
+		if event_id is not None:
+			payload["id"]= str(event_id)
 
 		if email is not None:
 			payload["email"]=email
@@ -419,7 +432,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_push_open(self,  campaign_id,email=None, user_id=None,
+	def track_push_open(self, campaign_id, email=None, user_id=None,
 						template_id=None, message_id=None, created_at=None,
 						data_fields=None):
 
@@ -479,10 +492,22 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_experiment_metrics(self, path,
+	def get_experiment_metrics(self, path, return_response_object= None,
 							   experiment_id=None, campaign_id=None,
 							   start_date_time=None, end_date_time=None
 							   ):
+		"""
+			This endpoint doesn't return a JSON object, instead it returns
+			a series of rows, each its own object. Given this setup, it makes 
+			sense to treat it how we handle our Bulk Export reqeusts.
+
+			Arguments:
+
+			path: the directory on your computer you wish the file to be downloaded into.
+			
+			return_response_object: recommended to be set to 'False'.  If set to 'True', 
+			will just return the response object as defined by the 'python-requests' module.
+			"""
 
 		call="/api/experiments/metrics"
 
@@ -507,7 +532,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
-	Export Data Requests
+	Export Requests
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -614,6 +639,23 @@ class IterableApi():
 									params=payload, path=path,
 									return_response_object=return_response_object)
 
+
+	def export_user_events(self, email, include_custom_events,
+						   path, return_response_object= None):
+
+		call ="/api/export/userEvents"
+
+		if isinstance(include_custom_events, bool) is False:
+			raise ValueError("'include_custom_events' parameter must be a boolean")
+
+		payload = {}
+
+		payload["email"]= str(email)
+
+		payload["includeCustomEvents"] = include_custom_events
+
+		return self.export_data_api(call=call, params=payload, path=path)
+
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 	
 	Iterable inApp Requests
@@ -684,7 +726,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET")
 
-	def create_list(self, list_name):
+	def create_static_list(self, list_name):
 
 		call = "/api/lists"
 
@@ -700,7 +742,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="DELETE")
 
-	def number_of_users_in_list(self, list_id):
+	def count_of_users_in_list(self, list_id):
 
 		call = "/api/lists/"+str(list_id)+"/size"
 
@@ -904,7 +946,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_templates_for_project(self, template_type=None, 
+	def get_templates(self, template_type=None, 
 								  message_medium=None,
 								  start_date_time=None,
 								  end_date_time=None):
@@ -937,7 +979,7 @@ class IterableApi():
 
 		return self.api_call(call = call, method = "GET", params = payload)
 
-	def get_email_template(self, template_id, locale=None):
+	def get_email_template_by_templateId(self, template_id, locale=None):
 
 		call="/api/templates/email/get"
 
@@ -1106,7 +1148,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def get_email_template(self, client_template_id):
+	def get_email_template_by_client_templateId(self, client_template_id):
 
 		call="/api/templates/getClientTemplateId"
 
@@ -1313,7 +1355,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def delete_user(self, email):
+	def delete_user_by_email(self, email):
 	
 		"""
 		This call will delete a user from the Iterable database.  
@@ -1431,12 +1473,6 @@ class IterableApi():
 						  campaign_id=None, start_date_time=None,
 						  end_date_time=None, exclude_blast_campaigns=None,
 						  message_medium=None):
-		"""
-
-		campaign_id takes an Array[double] as a query parameter...what
-		does this mean x=[[1,2,3],[4,5,6]]?
-
-		"""
 
 		call = "/api/users/getSentMessages"
 
@@ -1505,7 +1541,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 	def update_user(self, email=None, data_fields=None, user_id=None,
-					merge_nested_objects=None):
+					prefer_userId= None, merge_nested_objects=None):
 
 		"""
 		The Iterable 'User Update' api updates a user profile with new data 
@@ -1535,20 +1571,31 @@ class IterableApi():
 		if user_id is not None:
 			payload["userId"] = str(user_id)
 
+		if prefer_userId is not None:
+			payload["preferUserId"]= prefer_userId
+
 		if merge_nested_objects is not None:
 			payload["mergeNestedObjects"] = merge_nested_objects
 		
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def update_email(self, current_email, new_email):
+	def update_email(self, new_email, current_email= None,
+					 current_userid= None):
 
 		call = "/api/users/updateEmail"
 
 		payload = {}
 
-		payload["currentEmail"] = str(current_email)
+		if current_email is not None:
+			payload["currentEmail"] = str(current_email)
+
+		if current_userid is not None:
+			payload["currentUserId"] = str(current_userid)
 
 		payload["newEmail"] = str(new_email)
+
+		if ('currentEmail' or 'currentUserId') in payload == False:
+			raise ValueError('You need to pass in either email or username into the function')
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -1577,6 +1624,32 @@ class IterableApi():
 
 		if template_id is not None:
 			payload["templateId"]= template_id
+
+		return self.api_call(call=call, method="POST", json=payload)
+
+	def get_forgotten_users_in_complaince_with_gdpr(self):
+
+		call= "/api/users/forgotten"
+
+		return self.api_call(call=call, method="GET")
+
+	def forget_a_user_in_compliance_with_gdpr(self, email):
+
+		call= "/api/users/forget"
+
+		payload ={}
+
+		payload["email"]= email
+
+		return self.api_call(call=call, method="POST", json=payload)
+
+	def unforget_a_user_in_compliance_with_gdpr(self, email):
+
+		call="/api/users/unforget"
+
+		payload={}
+
+		payload["email"]= email
 
 		return self.api_call(call=call, method="POST", json=payload)
 
