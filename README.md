@@ -83,7 +83,7 @@ event_details= {
 
 ic.track_event(email="abe.lincoln@usa.gov",
 				event_name="app_login",
-				dataFields=event_details,
+				data_fields=event_details,
 				campaign_id=215,
 				template_id= 1000)
 ```
