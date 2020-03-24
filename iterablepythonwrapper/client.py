@@ -1465,7 +1465,7 @@ class IterableApi():
 
 	def get_user_fields(self):
 
-		call = "api/users/getFields"
+		call = "/api/users/getFields"
 
 		return self.api_call(call=call, method="GET")
 
