@@ -250,7 +250,7 @@ class IterableApi():
 			payload["createdAt"]= created_at
 
 		if data_fields is not None:
-			payload["data_fields"]= data_fields
+			payload["dataFields"]= data_fields
 
 		return self.api_call(call=call, method="POST", json=payload)
 
