@@ -748,7 +748,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="GET")
 
-	def get_users_in_list(self, list_id):
+	def get_users_in_list(self, list_id, path, return_response_object=None ):
 
 		call = "/api/lists/getUsers"
 
@@ -756,7 +756,7 @@ class IterableApi():
 
 		payload["listId"]= list_id
 
-		return self.api_call(call=call, method="GET", params=payload)
+		return self.export_data_api(call=call, method="GET", params=payload, path=path, return_response_object=return_response_object )
 
 	def add_subscribers_to_list(self, list_id, subscribers):
 
