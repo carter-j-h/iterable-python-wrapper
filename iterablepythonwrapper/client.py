@@ -2,7 +2,9 @@ import csv
 import json
 import pdb
 import requests
+from requests.adapters import HTTPAdapter
 import time
+from urllib3.util.retry import Retry
 
 from datetime import datetime
 
@@ -11,19 +13,19 @@ class IterableApi():
 	"""
 	This is a python wrapper for the Iterable API
 
-	We are using the 'Requests' HTTP python library, which I 
+	We are using the 'Requests' HTTP python library, which I
 	have found very flexible to accomodate the various methods
-	that customers leverage to interact with our API.  'Requests' 
-	documentation is also excellent, enabling our team to 
-	quickly update this wrapper to support a wide range of use cases.  
+	that customers leverage to interact with our API.  'Requests'
+	documentation is also excellent, enabling our team to
+	quickly update this wrapper to support a wide range of use cases.
 
-	"""	
+	"""
 
 	def __init__(self, api_key):
 		"""
 		This preforms the necessary initialization parameters for the
-		Iterable API wrapper. It stores the base URI, the API key for the 
-		project, and headers that shoudl be consistent across all requests. 
+		Iterable API wrapper. It stores the base URI, the API key for the
+		project, and headers that shoudl be consistent across all requests.
 
 		"""
 		self.api_key = api_key
@@ -31,7 +33,7 @@ class IterableApi():
 		self.headers = {
 						"Content-type": "application/json",
 						"Api-Key": self.api_key
-						}		
+						}
 
 	def api_call(self, call, method, params=None, headers=None, data=None,
 				 json=None):
@@ -41,9 +43,9 @@ class IterableApi():
 		examples where this is the case).  This is beneficial because:
 			1. Allows for easier debugging if a request fails
 			2. Currently, Iterable only needs the API key from a security
-			standpoint. In the future, if it were to require an  
+			standpoint. In the future, if it were to require an
 			access token for each request we could easily manage the granting
-			and expiration management of such a token.  
+			and expiration management of such a token.
 
 		"""
 
@@ -58,11 +60,18 @@ class IterableApi():
 			json ={}
 
 		# make the request following the 'requests.request' method
-		r = requests.request(method=method, url=self.base_uri+call, params=params,
-							 headers=self.headers, data=data, json=json)	
+		retries = Retry(total=5, backoff_factor=1, status_forcelist=[504])
+        requests_session = requests.Session()
+        requests_session.mount(
+			self.base_uri+call,
+            HTTPAdapter(max_retries=retries),
+        )
 
-		response = {			
-			"body": r.json(),			
+		r = requests_session.request(method=method, url=self.base_uri+call, params=params,
+							 headers=self.headers, data=data, json=json)
+
+		response = {
+			"body": r.json(),
 			"code": r.status_code,
 			"headers": r.headers,
 			"url": r.url
@@ -71,15 +80,15 @@ class IterableApi():
 		return response
 
 	def export_data_api(self, call,
-						params, path, 
-						chunk_size=None, 
+						params, path,
+						chunk_size=None,
 						return_response_object=None):
 
 		r = requests.request(method="GET", url=self.base_uri+call, params=params,
 							 headers=self.headers, stream=True)
 
 		if r.status_code == 200:
-			
+
 			if return_response_object is (not None and True):
 
 				return r
@@ -95,11 +104,11 @@ class IterableApi():
 				local_filename = 'iterable_' + params['dataTypeName'] + str(round(time.time())) + '.json'
 
 			with open(path+local_filename, 'wb') as write_file:
-				
+
 				for chunk in r.iter_content(chunk_size=chunk_size):
 					if chunk:
 						write_file.write(chunk)
-			
+
 			return True
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -168,13 +177,13 @@ class IterableApi():
 		else:
 			raise TypeError('campaign ids are not stored in list format')
 
-		if isinstance(start_date_time, datetime.datetime):			
+		if isinstance(start_date_time, datetime.datetime):
 			payload["startDateTime"]= start_date_time
 		else:
 			raise TypeError('Start date is in incorrect format')
 
 		if isinstance(end_date_time, datetime.datetime):
-			
+
 			payload["endDateTime"]= end_date_time
 		else:
 			raise TypeError('End date is in incorrect format')
@@ -209,7 +218,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def track_purchase(self, user, items, total, purchase_id= None, campaign_id=None, 
+	def track_purchase(self, user, items, total, purchase_id= None, campaign_id=None,
 					   template_id=None, created_at=None,
 					   data_fields=None):
 		"""
@@ -221,7 +230,7 @@ class IterableApi():
 		call="/api/commerce/trackPurchase"
 
 		payload ={}
-	
+
 		if isinstance(user, dict):
 			payload["user"]= user
 		else:
@@ -238,13 +247,13 @@ class IterableApi():
 			raise TypeError('total is not in correct format')
 
 		if purchase_id is not None:
-			payload["id"]= str(purchase_id) 
+			payload["id"]= str(purchase_id)
 
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
 		if template_id is not None:
-			payload["templateId"]= template_id		
+			payload["templateId"]= template_id
 
 		if created_at is not None:
 			payload["createdAt"]= created_at
@@ -306,7 +315,7 @@ class IterableApi():
 			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
 
 		if metadata is not None:
-			payload["metadata"]= metadata		
+			payload["metadata"]= metadata
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -359,7 +368,7 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	def track_event(self, event_name, event_id=None, email=None, 
+	def track_event(self, event_name, event_id=None, email=None,
 					created_at=None, data_fields=None, user_id=None,
 					campaign_id=None,template_id=None):
 
@@ -466,7 +475,7 @@ class IterableApi():
 							 message_id=None, campaign_id=None,
 							 template_id=None):
 
-		call ="/api/events/trackWebPushClick" 
+		call ="/api/events/trackWebPushClick"
 
 		payload={}
 
@@ -487,7 +496,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-		
+
 	Iterable Experiment Requests
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -498,21 +507,21 @@ class IterableApi():
 							   ):
 		"""
 			This endpoint doesn't return a JSON object, instead it returns
-			a series of rows, each its own object. Given this setup, it makes 
+			a series of rows, each its own object. Given this setup, it makes
 			sense to treat it how we handle our Bulk Export reqeusts.
 
 			Arguments:
 
 			path: the directory on your computer you wish the file to be downloaded into.
-			
-			return_response_object: recommended to be set to 'False'.  If set to 'True', 
+
+			return_response_object: recommended to be set to 'False'.  If set to 'True',
 			will just return the response object as defined by the 'python-requests' module.
 			"""
 
 		call="/api/experiments/metrics"
 
 		if isinstance(return_response_object, bool) is False:
-			raise ValueError("'return_iterator_object'parameter must be a boolean") 
+			raise ValueError("'return_iterator_object'parameter must be a boolean")
 
 		payload={}
 
@@ -531,7 +540,7 @@ class IterableApi():
 		return self.export_data_api(call=call, path=path, params=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-	
+
 	Export Requests
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -572,8 +581,8 @@ class IterableApi():
 
 		return self.export_data_api(call=call, params=payload, path=path)
 
-	def export_data_json(self, return_response_object, 
-						chunk_size=1024, 
+	def export_data_json(self, return_response_object,
+						chunk_size=1024,
 						path=None,
 						data_type_name=None, date_range=None,
 						delimiter=None, start_date_time=None,
@@ -591,22 +600,22 @@ class IterableApi():
 		2. chunk_size:
 			Chunk size is used as a paremeter in the r.iter_content(chunk_size) method
 			that controls how big the response chunks are (in bytes).  Depending on the
-			device used to make the request, this might change depending on the user. 
-			Default is set to 1 MB. 
+			device used to make the request, this might change depending on the user.
+			Default is set to 1 MB.
 		3. path:
 			Allows you to choose the directory where the file is downloaded into.
 				Example: "/Users/username/Desktop/"
 			If not set the file will download into the current directory.
-			
+
 		"""
 		call="/api/export/data.json"
 
 		# make sure correct ranges are being used
-		date_ranges = ["Today", "Yesterday", "BeforeToday", "All"]		
-		
+		date_ranges = ["Today", "Yesterday", "BeforeToday", "All"]
+
 		if isinstance(return_response_object, bool) is False:
-			raise ValueError("'return_iterator_object'parameter must be a boolean") 
-		
+			raise ValueError("'return_iterator_object'parameter must be a boolean")
+
 		if chunk_size is not None and isinstance(chunk_size, int):
 			pass
 		else:
@@ -635,7 +644,7 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.export_data_api(call=call, chunk_size=chunk_size, 
+		return self.export_data_api(call=call, chunk_size=chunk_size,
 									params=payload, path=path,
 									return_response_object=return_response_object)
 
@@ -657,7 +666,7 @@ class IterableApi():
 		return self.export_data_api(call=call, params=payload, path=path)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-	
+
 	Iterable inApp Requests
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
@@ -674,7 +683,7 @@ class IterableApi():
 		payload["count"]= count
 
 		if user_id is not None:
-			payload["userId"]=str(user_id)	
+			payload["userId"]=str(user_id)
 
 		if platform is not None:
 			payload["platform"]=str(platform)
@@ -686,7 +695,7 @@ class IterableApi():
 
 	def send_in_app_notification(self, campaign_id, recipient_email,
 								 message_medium, data_fields=None,
-								 send_at=None,								 
+								 send_at=None,
 								 allow_repeat_marketing_sends=None):
 
 		call="/api/inApp/target"
@@ -714,7 +723,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-		
+
 		Iterable List requests
 
 
@@ -798,7 +807,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-	
+
 	Iterable MessageType Requests
 
 
@@ -816,7 +825,7 @@ class IterableApi():
 
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-	
+
 	def list_available_tables(self):
 
 		call="/api/metadata"
@@ -841,7 +850,7 @@ class IterableApi():
 		return self.api_call(call=call, method="GET", params=payload)
 
 	def delete_single_metadata_key_value(self, table, key):
-		
+
 		call="/api/metadata/"+ str(table) + "/" + str(key)
 
 		return self.api_call(call=call, method="DELETE")
@@ -871,9 +880,9 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_push_notification(self, campaign_id, recipient_email, 
+	def send_push_notification(self, campaign_id, recipient_email,
 							   message_medium, data_fields=None,
-							   send_at=None, 
+							   send_at=None,
 							   allow_repeat_marketing_sends=None,
 							   metadata=None):
 
@@ -910,9 +919,9 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def send_sms_message(self, campaign_id, recipient_email, 
+	def send_sms_message(self, campaign_id, recipient_email,
 					     message_medium, data_fields=None,
-					     send_at=None, 
+					     send_at=None,
 					     allow_repeat_marketing_sends=None,
 					     ):
 
@@ -936,9 +945,9 @@ class IterableApi():
 			payload["sendAt"]= send_at
 
 		if allow_repeat_marketing_sends is not None:
-			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends		
+			payload["allowRepeatMarketingSends"]= allow_repeat_marketing_sends
 
-		return self.api_call(call=call, method="POST", json=payload) 
+		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -946,7 +955,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def get_templates(self, template_type=None, 
+	def get_templates(self, template_type=None,
 								  message_medium=None,
 								  start_date_time=None,
 								  end_date_time=None):
@@ -959,18 +968,18 @@ class IterableApi():
 
 		iterable_message_mediums = ["Email", "Push", "InApp", "SMS"]
 
-		if template_type is not None and template_type in iterable_template_types:			
+		if template_type is not None and template_type in iterable_template_types:
 			payload["templateType"]= template_type
 
 		elif template_type is not None and template_type not in iterable_template_types:
-			raise Exception("It looks like you listed an incorrect template type '%s'" % template_type)	
+			raise Exception("It looks like you listed an incorrect template type '%s'" % template_type)
 
-		if message_medium is not None and message_medium in iterable_message_mediums:			
-			payload["messageMedium"]= message_medium		
+		if message_medium is not None and message_medium in iterable_message_mediums:
+			payload["messageMedium"]= message_medium
 
 		elif message_medium is not None and message_medium not in iterable_message_mediums:
 			raise Exception("It looks like you listed an incorrect message medium '%s'" % message_medium)
-			
+
 		if start_date_time is not None:
 			payload["startDateTime"]= start_date_time
 
@@ -1223,7 +1232,7 @@ class IterableApi():
 		return self.api_call(call=call, method="POST", json=payload)
 
 	def upsert_push_template(self, client_template_id, name=None,
-							 message=None, payload_content=None, 
+							 message=None, payload_content=None,
 							 badge=None, locale=None,
 							 message_type_id=None, sound=None,
 							 deeplink=None, campaign_id=None):
@@ -1346,7 +1355,7 @@ class IterableApi():
 		if campaign_id is not None:
 			payload["campaignId"]= campaign_id
 
-		return self.api_call(call=call, method="POST", json=payload)			
+		return self.api_call(call=call, method="POST", json=payload)
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
@@ -1356,12 +1365,12 @@ class IterableApi():
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 	def delete_user_by_email(self, email):
-	
+
 		"""
-		This call will delete a user from the Iterable database.  
+		This call will delete a user from the Iterable database.
 		This call requires a path parameter to be passed in, 'email'
 		in this case, which is why we're just adding this to the 'call'
-		argument that goes into the 'api_call' request. 		
+		argument that goes into the 'api_call' request.
 		"""
 		call = "/api/users/"+ str(email)
 
@@ -1377,23 +1386,23 @@ class IterableApi():
 	def bulk_update_user(self, users):
 
 		"""
-		The Iterable 'Bulk User Update' api Bulk update user data or adds 
+		The Iterable 'Bulk User Update' api Bulk update user data or adds
 		it if does not exist. Data is merged - missing fields are not deleted
 
 		The body of the request takes 1 keys:
 			1. users -- in the form of an array -- which is the list of users
-				that we're updating in sets of 50 users at a time, which is the 
-				most that can be batched in a single request.  
+				that we're updating in sets of 50 users at a time, which is the
+				most that can be batched in a single request.
 		"""
 
-		call = "/api/users/bulkUpdate"		
-		
+		call = "/api/users/bulkUpdate"
+
 		payload = {}
 
 		if isinstance(users, list):
 			payload["users"] = users
 		else:
-			raise TypeError ('users are not in Arrary format')		
+			raise TypeError ('users are not in Arrary format')
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -1406,7 +1415,7 @@ class IterableApi():
 		if isinstance(update_subscriptions_requests, list):
 			payload["updateSubscriptionsRequests"] = update_subscriptions_requests
 		else:
-			raise TypeError ('subscription requests are not in Arrary format')	
+			raise TypeError ('subscription requests are not in Arrary format')
 
 		return self.api_call(call=call, method="POST", json=payload)
 
@@ -1422,7 +1431,7 @@ class IterableApi():
 
 	def delete_users_by_userid_userid(self, user_id):
 
-		call = "/api/users/byUserId/"+str(user_id)			
+		call = "/api/users/byUserId/"+str(user_id)
 
 		return self.api_call(call=call, method="DELETE")
 
@@ -1445,7 +1454,7 @@ class IterableApi():
 
 		payload["token"] = str(token)
 
-		if email is not None:	
+		if email is not None:
 			payload["email"] = str(email)
 
 		if user_id is not None:
@@ -1544,7 +1553,7 @@ class IterableApi():
 					prefer_userId= None, merge_nested_objects=None):
 
 		"""
-		The Iterable 'User Update' api updates a user profile with new data 
+		The Iterable 'User Update' api updates a user profile with new data
 		fields. Missing fields are not deleted and new data is merged.
 
 		The body of the request takes 4 keys:
@@ -1553,13 +1562,13 @@ class IterableApi():
 			2. data fields-- in the form of an object-- these are the additional attributes
 			 of the user that we want to add or update
 			3. userId- in the form of a string-- another field we can use as a lookup
-				of the user. 
+				of the user.
 			4. mergeNestedObjects-- in the form of an object-- used to merge top level
-				objects instead of overwriting. 
+				objects instead of overwriting.
 		"""
 
 		call = "/api/users/update"
-		
+
 		payload = {}
 
 		if email is not None:
@@ -1576,7 +1585,7 @@ class IterableApi():
 
 		if merge_nested_objects is not None:
 			payload["mergeNestedObjects"] = merge_nested_objects
-		
+
 		return self.api_call(call=call, method="POST", json=payload)
 
 	def update_email(self, new_email, current_email= None,
@@ -1661,7 +1670,7 @@ class IterableApi():
 
 	def send_web_push_notification(self, campaign_id, recipient_email,
 								   message_medium, data_fields=None,
-							       send_at=None, 
+							       send_at=None,
 							       allow_repeat_marketing_sends=None):
 
 		call="/api/webPush/target"
@@ -1694,7 +1703,7 @@ class IterableApi():
 
 	"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-	def trigger_workflow(self, workflow_id, email=None, 
+	def trigger_workflow(self, workflow_id, email=None,
 						 data_fields=None, list_id=None):
 
 		call="/api/workflows/triggerWorkflow"
@@ -1714,9 +1723,8 @@ class IterableApi():
 
 		return self.api_call(call=call, method="POST", json=payload)
 
-	
 
 
 
 
-	
+
