@@ -63,21 +63,28 @@ class IterableApi():
 		retries = Retry(total=5, backoff_factor=1, status_forcelist=[504])
         requests_session = requests.Session()
         requests_session.mount(
-            self.base_uri+call,
-            HTTPAdapter(max_retries=retries),
+			self.base_uri+call,
+			HTTPAdapter(max_retries=retries),
         )
 
-        r = requests_session.request(method=method, url=self.base_uri+call, params=params,
-							 headers=self.headers, data=data, json=json)
+        r = requests_session.request(
+			method=method,
+			url=self.base_uri+call,
+			params=params,
+			headers=self.headers,
+			data=data,
+			json=json
+		)
 
-		response = {
-			"body": r.json(),
-			"code": r.status_code,
-			"headers": r.headers,
-			"url": r.url
-		}
+	response = {
+		"body": r.json(),
+		"code": r.status_code,
+		"headers": r.headers,
+		"url": r.url
+	}
 
 		return response
+
 
 	def export_data_api(self, call,
 						params, path,
