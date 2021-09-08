@@ -1611,7 +1611,7 @@ class IterableApi():
 		payload["email"]= email
 
 		if email_list_ids is not None:
-			payload["emailListIds"]
+			payload["emailListIds"] = email_list_ids
 
 		if unsubscribed_channel_ids is not None:
 			payload["unsubscribedChannelIds"]= unsubscribed_channel_ids
