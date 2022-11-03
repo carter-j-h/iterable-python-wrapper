@@ -1713,10 +1713,3 @@ class IterableApi():
 			payload["listId"]= list_id
 
 		return self.api_call(call=call, method="POST", json=payload)
-
-	
-
-
-
-
-	
