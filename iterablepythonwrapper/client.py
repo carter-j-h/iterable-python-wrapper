@@ -1048,7 +1048,7 @@ class IterableApi():
 			payload["googleAnalyticsCampaignName"]= google_analytics_campaign_name
 
 		if link_parameters is not None:
-			payload["linkParameters"]= link_parameters
+			payload["linkParams"]= link_parameters
 
 		if data_feed_id is not None:
 			payload["dataFeedId"]= data_feed_id
@@ -1126,7 +1126,7 @@ class IterableApi():
 			payload["googleAnalyticsCampaignName"]= google_analytics_campaign_name
 
 		if link_parameters is not None:
-			payload["linkParameters"]= link_parameters
+			payload["linkParams"]= link_parameters
 
 		if data_feed_id is not None:
 			payload["dataFeedId"]= data_feed_id
@@ -1713,10 +1713,3 @@ class IterableApi():
 			payload["listId"]= list_id
 
 		return self.api_call(call=call, method="POST", json=payload)
-
-	
-
-
-
-
-	
